@@ -1,0 +1,89 @@
+{
+  "global": {
+    "เข็มทิ่มตำ": [
+      "first_aid.root"
+    ],
+    "โดนเข็ม": [
+      "first_aid.root"
+    ],
+    "เกิดเหตุแล้วทำอย่างไร": [
+      "first_aid.root"
+    ],
+    "เลือดเข้าตา": [
+      "first_aid.eye"
+    ],
+    "เลือดเข้าปาก": [
+      "first_aid.mouth"
+    ],
+    "การเจาะเลือด": [
+      "lab.source.ic04"
+    ],
+    "IC04": [
+      "lab.source.ic04"
+    ],
+    "IC05": [
+      "lab.staff.ic05"
+    ],
+    "การรับยา oPEP": [
+      "opep.office",
+      "opep.after_hours"
+    ],
+    "PEP": [
+      "opep.office",
+      "opep.after_hours"
+    ],
+    "แนวทางปฏิบัติ": [
+      "knowledge.overview"
+    ],
+    "ความรู้": [
+      "knowledge.overview"
+    ]
+  },
+  "byLastRoute": {
+    "first_aid.root": {
+      "เข้าตา": [
+        "first_aid.eye"
+      ],
+      "เข้าปาก": [
+        "first_aid.mouth"
+      ],
+      "เข็มตำ": [
+        "first_aid.sharp_skin"
+      ]
+    },
+    "lab.source.ic04": {
+      "ผลลบ": [
+        "lab.source.negative"
+      ],
+      "ผลบวก": [
+        "lab.source.positive"
+      ]
+    },
+    "lab.source.positive": {
+      "ในเวลา": [
+        "exposure.office"
+      ],
+      "นอกเวลา": [
+        "exposure.after_hours"
+      ]
+    },
+    "opep.office": {
+      "สูตรยา": [
+        "opep.regimen"
+      ],
+      "ติดตาม": [
+        "followup.hiv",
+        "followup.hcv"
+      ]
+    },
+    "opep.after_hours": {
+      "สูตรยา": [
+        "opep.regimen"
+      ],
+      "ติดตาม": [
+        "followup.hiv",
+        "followup.hcv"
+      ]
+    }
+  }
+}

@@ -14,6 +14,7 @@ const validate = (value: unknown) => {
 
 describe('clinical route contract', () => {
   it('accepts a complete source-backed route', () => expect(validate(fixture())).toBe(true));
+  it('accepts the planned single-segment notify route', () => expect(validate({ ...fixture(), routeId: 'notify' })).toBe(true));
   it.each([
     ['empty route ID', { ...fixture(), routeId: '' }],
     ['missing source', { ...fixture(), source: undefined }],

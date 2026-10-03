@@ -1,0 +1,10 @@
+{
+  "title": "แนวทางเมื่อบุคลากรทางการแพทย์สัมผัสเลือดหรือสารคัดหลั่งขณะปฏิบัติงาน",
+  "version": "revision-3-2026-09-03",
+  "revision": 3,
+  "effectiveDate": "2026-09-03",
+  "sourceFile": "แนวทางเมื่อบุคลากรทางการแพทย์สัมผัสเลือ.pdf",
+  "pageCount": 3,
+  "partialRouteIds": ["exposure.office", "exposure.after_hours", "opep.after_hours", "lab.source.ic04", "hepb.notes", "knowledge.overview"],
+  "transcription": "Visual transcription; layout whitespace normalized; clinical wording preserved."
+}

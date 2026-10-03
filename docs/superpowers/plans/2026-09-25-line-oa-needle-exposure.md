@@ -71,6 +71,8 @@
 
 ### Ticket 2: ถอด PDF เป็น route corpus และ source map (2–3 วัน)
 
+สถานะ: เสร็จ 3 ตุลาคม 2569 — 29 routes, 2 routes ปิดเพราะต้นฉบับกำกวม; ผลตรวจและข้อวินิจฉัยอยู่ใน docs/implementation-progress.md การตรวจ snapshot ของ renderer จะทำใน Ticket 6
+
 **Depends on:** Ticket 1
 
 **Files:** Create content/routes.json, content/aliases.json, content/ui.json, content/metadata.json, docs/source-map.md, tests/content-corpus.test.ts, tests/content-snapshot.test.ts; Modify scripts/validate-content.mjs

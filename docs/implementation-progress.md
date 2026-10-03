@@ -24,3 +24,23 @@ as expected because the real corpus is not yet created; this keeps deploy gated.
 
 Next: Ticket 2, extract and verify PDF routes with source mapping. No credentials,
 namespace IDs, clinical answers, or external deployments have been added.
+
+Ticket 2: complete (2026-10-03). PDF visually inspected on all 3 pages;
+automatic extraction contained damaged Thai glyphs, so transcription used the
+rendered pages. Added 29 routes (27 enabled, 2 disabled), metadata, UI, aliases
+and source-map inventory. Clinical whitespace and line wrapping are normalized;
+wording, numbers, test names and drug names are preserved. Snapshot baseline
+was read and compared against the rendered PDF before acceptance.
+
+Rulings: IC06 is disabled because the source says Anti HBsAg positive; the
+two-course Hepatitis B route is disabled because the source says vaccine HBIG.
+Do not silently correct either. Related parent routes are listed under
+metadata.partialRouteIds; Ticket 6 must render the partial-content warning.
+Allow single-segment route IDs because notify is explicitly named in the plan.
+Renderer snapshot verification belongs to Ticket 6, when the renderer exists.
+
+Evidence: corpus tests failed before corpus creation; CLI valid/duplicate/link/
+version tests then failed against the old validator before implementing checks.
+Final content:check, typecheck, and suite passed 16/16. Source map lists the
+conditions and branches; this does not certify the clinical correctness of the
+source or publish the bot. Next: Ticket 3 deterministic router.

@@ -1,0 +1,592 @@
+[
+  {
+    "routeId": "first_aid.root",
+    "category": "clinical",
+    "presentation": "text",
+    "text": "เมื่อบุคลากรทางการแพทย์สัมผัสเลือดหรือสารคัดหลั่ง ให้รีบปฐมพยาบาลตามกรณีดังต่อไปนี้",
+    "source": {
+      "version": "revision-3-2026-09-03",
+      "pages": [
+        1
+      ]
+    },
+    "next": [
+      {
+        "routeId": "first_aid.sharp_skin",
+        "label": "เข็ม/ของมีคม/ผิวหนัง"
+      },
+      {
+        "routeId": "first_aid.eye",
+        "label": "กระเด็นเข้าตา"
+      },
+      {
+        "routeId": "first_aid.mouth",
+        "label": "กระเด็นเข้าปาก"
+      }
+    ],
+    "enabled": true
+  },
+  {
+    "routeId": "first_aid.sharp_skin",
+    "category": "clinical",
+    "presentation": "text",
+    "text": "กรณีถูกเข็มหรือของมีคมที่เปื้อนเลือดหรือสารคัดหลั่งตำหรือบาด หรือเลือดหรือสารคัดหลั่งกระเด็นถูกผิวหนังที่ไม่ปกติ : ไม่ต้องบีบเค้นบริเวณที่สัมผัส ให้ล้างด้วยน้ำสะอาด หรือสบู่ แล้วเช็ดด้วย 70% Alcohol หรือ Betadine solution หรือ 5% Chlorhexidine gluconate",
+    "source": {
+      "version": "revision-3-2026-09-03",
+      "pages": [
+        1
+      ]
+    },
+    "next": [
+      {
+        "routeId": "notify",
+        "label": "แจ้งและบันทึก"
+      }
+    ],
+    "enabled": true
+  },
+  {
+    "routeId": "first_aid.eye",
+    "category": "clinical",
+    "presentation": "text",
+    "text": "กรณีเลือดหรือสารคัดหลั่งกระเด็นเข้าตา : ล้างตาด้วยน้ำสะอาดหรือ NSS มากๆ",
+    "source": {
+      "version": "revision-3-2026-09-03",
+      "pages": [
+        1
+      ]
+    },
+    "next": [
+      {
+        "routeId": "notify",
+        "label": "แจ้งและบันทึก"
+      }
+    ],
+    "enabled": true
+  },
+  {
+    "routeId": "first_aid.mouth",
+    "category": "clinical",
+    "presentation": "text",
+    "text": "กรณีเลือดหรือสารคัดหลั่งกระเด็นเข้าปาก: บ้วนปากและกลั้วคอด้วยน้ำสะอาดหรือ NSS",
+    "source": {
+      "version": "revision-3-2026-09-03",
+      "pages": [
+        1
+      ]
+    },
+    "next": [
+      {
+        "routeId": "notify",
+        "label": "แจ้งและบันทึก"
+      }
+    ],
+    "enabled": true
+  },
+  {
+    "routeId": "notify",
+    "category": "clinical",
+    "presentation": "text",
+    "text": "หลังการปฐมพยาบาล ให้ดำเนินการตามขั้นตอนดังนี้\n1. แจ้งพยาบาลหัวหน้าเวรประจำหน่วยงานที่บุคลากรเกิดอุบัติเหตุ\n2. ซักประวัติรายละเอียดของการสัมผัสความเสี่ยงของผู้ป่วยและบันทึกหลักฐาน",
+    "source": {
+      "version": "revision-3-2026-09-03",
+      "pages": [
+        1
+      ]
+    },
+    "next": [
+      {
+        "routeId": "lab.source.ic04",
+        "label": "ตรวจเลือดผู้ป่วย"
+      }
+    ],
+    "enabled": true
+  },
+  {
+    "routeId": "lab.source.ic04",
+    "category": "clinical",
+    "presentation": "text",
+    "text": "เจาะเลือดผู้ป่วย โดย Request lab ในแถบ Method Code : IC04 Lab for needle injury\n(ตรวจ Anti HIV (rapid test), HBsAg, Anti HCV)",
+    "source": {
+      "version": "revision-3-2026-09-03",
+      "pages": [
+        1
+      ]
+    },
+    "next": [
+      {
+        "routeId": "lab.source.negative",
+        "label": "ผล Negative ทุกตัว"
+      },
+      {
+        "routeId": "lab.source.positive",
+        "label": "ผล Positive อย่างน้อยหนึ่งตัว"
+      },
+      {
+        "routeId": "lab.source.opd",
+        "label": "กรณี OPD"
+      }
+    ],
+    "enabled": true
+  },
+  {
+    "routeId": "lab.source.opd",
+    "category": "clinical",
+    "presentation": "text",
+    "text": "กรณีเกิดอุบัติเหตุผู้ป่วย OPD ให้พยาบาลประจำ OPD เป็นผู้ Pre counselling ผู้ป่วย และนำส่งผู้ป่วยเจาะเลือดที่ ห้องเจาะเลือด",
+    "source": {
+      "version": "revision-3-2026-09-03",
+      "pages": [
+        1
+      ]
+    },
+    "next": [
+      {
+        "routeId": "lab.source.ic04",
+        "label": "ตรวจเลือดผู้ป่วย"
+      }
+    ],
+    "enabled": true
+  },
+  {
+    "routeId": "lab.source.negative",
+    "category": "clinical",
+    "presentation": "text",
+    "text": "กรณีที่ 1: ผล Negative ทุกตัว\nไม่ต้องให้ oPEP (1) และไม่ต้องติดตามบุคลากรที่สัมผัส โดยให้ปฏิบัติย้อนหลังดังนี้\n1. บันทึกรายงานการเกิดอุบัติเหตุส่งงาน IC\n2. ลงอุบัติการณ์ความเสี่ยงในโปรแกรม HRMS",
+    "source": {
+      "version": "revision-3-2026-09-03",
+      "pages": [
+        1
+      ]
+    },
+    "next": [
+      {
+        "routeId": "opep.request",
+        "label": "ขอเจาะเลือด/ยืนยัน oPEP"
+      }
+    ],
+    "enabled": true
+  },
+  {
+    "routeId": "lab.source.positive",
+    "category": "clinical",
+    "presentation": "text",
+    "text": "กรณีที่ 2: ผล Positive ตัวใดตัวหนึ่ง",
+    "source": {
+      "version": "revision-3-2026-09-03",
+      "pages": [
+        1
+      ]
+    },
+    "next": [
+      {
+        "routeId": "exposure.office",
+        "label": "ในเวลาราชการ"
+      },
+      {
+        "routeId": "exposure.after_hours",
+        "label": "นอกเวลาราชการ"
+      }
+    ],
+    "enabled": true
+  },
+  {
+    "routeId": "exposure.office",
+    "category": "clinical",
+    "presentation": "text",
+    "text": "หากเหตุเกิดในเวลาราชการ\nพบ ICN กรณีผลเลือดผู้ป่วยตัวใดตัวหนึ่งบวก\nเจาะเลือดบุคลากรภายใน 24 ชม. Request lab ในแถบ Method (ในเวลาเจาะที่ห้องเจาะเลือด) ตามกรณีดังนี้",
+    "source": {
+      "version": "revision-3-2026-09-03",
+      "pages": [
+        2
+      ]
+    },
+    "next": [
+      {
+        "routeId": "lab.staff.ic05",
+        "label": "กรณี IC05"
+      },
+      {
+        "routeId": "opep.office",
+        "label": "oPEP ในเวลาราชการ"
+      }
+    ],
+    "enabled": true
+  },
+  {
+    "routeId": "exposure.after_hours",
+    "category": "clinical",
+    "presentation": "text",
+    "text": "หากเหตุเกิดนอกเวลาราชการ\n1. พบแพทย์ที่ ER\n2. แพทย์ ER พิจารณาให้ oPEP (2) เบื้องต้น 1-3 วัน\n3. นัด F/U ICN ในเวลาราชการ\n4. เจาะเลือดบุคลากรภายใน 24 ชม. Request lab ในแถบ Method (นอกเวลาเจาะที่ห้องฉุกเฉิน) ตามรหัส Code : IC05 หรือ Code : IC06 ข้างต้น\n5. พบแพทย์ห้องตรวจอาชีวเวชกรรมเพื่อรับ oPEP (2) ต่อ",
+    "source": {
+      "version": "revision-3-2026-09-03",
+      "pages": [
+        2
+      ]
+    },
+    "next": [
+      {
+        "routeId": "lab.staff.ic05",
+        "label": "กรณี IC05"
+      },
+      {
+        "routeId": "followup.hiv",
+        "label": "ติดตาม HIV"
+      },
+      {
+        "routeId": "report.ic",
+        "label": "รายงาน IC และ HRMS"
+      }
+    ],
+    "enabled": true
+  },
+  {
+    "routeId": "lab.staff.ic05",
+    "category": "clinical",
+    "presentation": "text",
+    "text": "Code : IC05 กรณีบุคลากรสัมผัสผู้ป่วย HIV หรือ Anti HCV positive (ตรวจ Anti HBS, Anti HCV, Anti HIV (Elisa) CBC, ALT, Cr)",
+    "source": {
+      "version": "revision-3-2026-09-03",
+      "pages": [
+        2
+      ]
+    },
+    "next": [],
+    "enabled": true
+  },
+  {
+    "routeId": "lab.staff.ic06",
+    "category": "clinical",
+    "presentation": "text",
+    "text": "Code : IC06 กรณีบุคลากรสัมผัสผู้ป่วย Anti HBsAg positive (ตรวจ Anti HBS, Anti HCV, Anti HIV (Elisa) CBC, ALT, Cr เพิ่ม HBsAg และ Anti HBc)",
+    "source": {
+      "version": "revision-3-2026-09-03",
+      "pages": [
+        2
+      ]
+    },
+    "next": [],
+    "enabled": false,
+    "disabledReason": "ต้นฉบับระบุ Anti HBsAg positive แต่หน้า 1 ตรวจ HBsAg; ต้องยืนยันชื่อผลตรวจก่อนเปิด route"
+  },
+  {
+    "routeId": "opep.office",
+    "category": "clinical",
+    "presentation": "text",
+    "text": "หากเหตุเกิดในเวลาราชการ\nพบแพทย์ห้องตรวจอาชีวเวชกรรม เพื่อรับ oPEP (2)",
+    "source": {
+      "version": "revision-3-2026-09-03",
+      "pages": [
+        2
+      ]
+    },
+    "next": [
+      {
+        "routeId": "opep.definition",
+        "label": "oPEP คืออะไร"
+      },
+      {
+        "routeId": "opep.regimen",
+        "label": "สูตรยาตามเอกสาร"
+      },
+      {
+        "routeId": "followup.hiv",
+        "label": "ติดตาม HIV"
+      },
+      {
+        "routeId": "followup.hcv",
+        "label": "ติดตาม HCV"
+      },
+      {
+        "routeId": "cr.notes",
+        "label": "ข้อพิจารณาค่า Cr"
+      }
+    ],
+    "enabled": true
+  },
+  {
+    "routeId": "opep.after_hours",
+    "category": "clinical",
+    "presentation": "text",
+    "text": "หากเหตุเกิดนอกเวลาราชการ\n1. พบแพทย์ที่ ER\n2. แพทย์ ER พิจารณาให้ oPEP (2) เบื้องต้น 1-3 วัน\n3. นัด F/U ICN ในเวลาราชการ\n4. เจาะเลือดบุคลากรภายใน 24 ชม. Request lab ในแถบ Method (นอกเวลาเจาะที่ห้องฉุกเฉิน) ตามรหัส Code : IC05 หรือ Code : IC06 ข้างต้น\n5. พบแพทย์ห้องตรวจอาชีวเวชกรรมเพื่อรับ oPEP (2) ต่อ",
+    "source": {
+      "version": "revision-3-2026-09-03",
+      "pages": [
+        2
+      ]
+    },
+    "next": [
+      {
+        "routeId": "opep.definition",
+        "label": "oPEP คืออะไร"
+      },
+      {
+        "routeId": "opep.regimen",
+        "label": "สูตรยาตามเอกสาร"
+      },
+      {
+        "routeId": "followup.hiv",
+        "label": "ติดตาม HIV"
+      },
+      {
+        "routeId": "followup.hcv",
+        "label": "ติดตาม HCV"
+      },
+      {
+        "routeId": "cr.notes",
+        "label": "ข้อพิจารณาค่า Cr"
+      }
+    ],
+    "enabled": true
+  },
+  {
+    "routeId": "opep.definition",
+    "category": "clinical",
+    "presentation": "text",
+    "text": "oPEP = Occupational post exposure Prophylaxis",
+    "source": {
+      "version": "revision-3-2026-09-03",
+      "pages": [
+        3
+      ]
+    },
+    "next": [],
+    "enabled": true
+  },
+  {
+    "routeId": "opep.regimen",
+    "category": "clinical",
+    "presentation": "text",
+    "text": "สูตรยาต้านไวรัส Kocitaf (TAF/FTC/DTG) 1x1 วันละ 1 ครั้ง (จำนวน 28 เม็ด)",
+    "source": {
+      "version": "revision-3-2026-09-03",
+      "pages": [
+        3
+      ]
+    },
+    "next": [
+      {
+        "routeId": "cr.notes",
+        "label": "ข้อพิจารณาค่า Cr"
+      }
+    ],
+    "enabled": true
+  },
+  {
+    "routeId": "opep.request",
+    "category": "clinical",
+    "presentation": "text",
+    "text": "หากบุคลากรต้องการเจาะเลือดหรือยืนยันต้องการ oPEP ให้ส่งพบ ICN เพื่อส่งเจาะเลือดตาม Standing order",
+    "source": {
+      "version": "revision-3-2026-09-03",
+      "pages": [
+        3
+      ]
+    },
+    "next": [],
+    "enabled": true
+  },
+  {
+    "routeId": "followup.hiv",
+    "category": "clinical",
+    "presentation": "text",
+    "text": "ออกบัตรนัดโดยห้องตรวจอาชีวเวชกรรม เพื่อ F/U Anti HIV ที่ 1 เดือน, 3 เดือน, 6 เดือน (4)",
+    "source": {
+      "version": "revision-3-2026-09-03",
+      "pages": [
+        2
+      ]
+    },
+    "next": [
+      {
+        "routeId": "followup.hiv_note",
+        "label": "หมายเหตุการติดตาม HIV"
+      },
+      {
+        "routeId": "followup.hcv",
+        "label": "ติดตาม HCV"
+      },
+      {
+        "routeId": "report.ic",
+        "label": "รายงาน IC และ HRMS"
+      }
+    ],
+    "enabled": true
+  },
+  {
+    "routeId": "followup.hiv_note",
+    "category": "clinical",
+    "presentation": "text",
+    "text": "ตรวจหาการติดเชื้อ HIV ซ้ำ ใน เดือนที่ 6 ในบุคลากรที่พบ Anti HCV + หรือมีการสัมผัสผู้ป่วยที่ติดเชื้อไวรัสตับอักเสบซีและตรวจบุคลากรไม่พบเอชไอวีในครั้งแรก",
+    "source": {
+      "version": "revision-3-2026-09-03",
+      "pages": [
+        3
+      ]
+    },
+    "next": [],
+    "enabled": true
+  },
+  {
+    "routeId": "followup.hcv",
+    "category": "clinical",
+    "presentation": "text",
+    "text": "F/U Anti HCV 6 เดือน (ถ้า source person Anti HCV Positive) โดยฟังผลที่งาน IC",
+    "source": {
+      "version": "revision-3-2026-09-03",
+      "pages": [
+        2
+      ]
+    },
+    "next": [
+      {
+        "routeId": "report.ic",
+        "label": "รายงาน IC และ HRMS"
+      }
+    ],
+    "enabled": true
+  },
+  {
+    "routeId": "report.ic",
+    "category": "clinical",
+    "presentation": "text",
+    "text": "บันทึกรายงานการเกิดอุบัติเหตุส่งงาน IC\nลงอุบัติการณ์ความเสี่ยงในโปรแกรม HRMS",
+    "source": {
+      "version": "revision-3-2026-09-03",
+      "pages": [
+        2
+      ]
+    },
+    "next": [],
+    "enabled": true
+  },
+  {
+    "routeId": "hepb.notes",
+    "category": "clinical",
+    "presentation": "text",
+    "text": "กรณีวันหยุดราชการติดต่อกันมากกว่า 3 วัน: กรณีผู้ป่วยมี HBsAg Positive และซักประวัติบุคลากรไม่มีภูมิคุ้มกัน (ผล HBsAb NEGATIVE) แพทย์พิจารณา",
+    "source": {
+      "version": "revision-3-2026-09-03",
+      "pages": [
+        3
+      ]
+    },
+    "next": [
+      {
+        "routeId": "hepb.hbig",
+        "label": "HBIG ตามเงื่อนไข"
+      },
+      {
+        "routeId": "hepb.one_course",
+        "label": "วัคซีนครบ 1 คอร์ส"
+      },
+      {
+        "routeId": "hepb.immune",
+        "label": "ผล HBsAb Positive"
+      }
+    ],
+    "enabled": true
+  },
+  {
+    "routeId": "hepb.hbig",
+    "category": "clinical",
+    "presentation": "text",
+    "text": "กรณีวันหยุดราชการติดต่อกันมากกว่า 3 วัน: กรณีผู้ป่วยมี HBsAg Positive และซักประวัติบุคลากรไม่มีภูมิคุ้มกัน (ผล HBsAb NEGATIVE) แพทย์พิจารณา\nสั่งยา HBIG ให้เจ้าหน้าที่ คือ HBIG ขนาด 0.06 ml / kg (IM) (ใช้ประมาณ 3 vials ต่อ ครั้ง) จำนวน 1 dose HBIG ควรให้ภายในเวลา 24 ชั่วโมง",
+    "source": {
+      "version": "revision-3-2026-09-03",
+      "pages": [
+        3
+      ]
+    },
+    "next": [],
+    "enabled": true
+  },
+  {
+    "routeId": "hepb.one_course",
+    "category": "clinical",
+    "presentation": "text",
+    "text": "กรณีวันหยุดราชการติดต่อกันมากกว่า 3 วัน: กรณีผู้ป่วยมี HBsAg Positive และซักประวัติบุคลากรไม่มีภูมิคุ้มกัน (ผล HBsAb NEGATIVE) แพทย์พิจารณา\nกรณีบุคลากรมีประวัติได้รับวัคซีน Hepatitis B ครบ 3 เข็ม 1 คอร์ส แต่ตรวจภูมิคุ้มกันไม่ขึ้น พิจารณาให้วัคซีน Hepatitis B จำนวน 3 เข็ม และ HBIG 1 dose",
+    "source": {
+      "version": "revision-3-2026-09-03",
+      "pages": [
+        3
+      ]
+    },
+    "next": [],
+    "enabled": true
+  },
+  {
+    "routeId": "hepb.two_courses",
+    "category": "clinical",
+    "presentation": "text",
+    "text": "กรณีบุคลากรมีประวัติได้รับวัคซีน Hepatitis B ครบ 3 เข็ม 2 คอร์ส แต่ตรวจภูมิคุ้มกันไม่ขึ้น พิจารณาให้วัคซีน HBIG 2 dose ห่างกัน 1 เดือน",
+    "source": {
+      "version": "revision-3-2026-09-03",
+      "pages": [
+        3
+      ]
+    },
+    "next": [],
+    "enabled": false,
+    "disabledReason": "ต้นฉบับใช้คำว่า ให้วัคซีน HBIG ซึ่งกำกวม; ไม่แก้หรือเปิดใช้จนกว่าจะได้รับข้อความยืนยัน"
+  },
+  {
+    "routeId": "hepb.immune",
+    "category": "clinical",
+    "presentation": "text",
+    "text": "กรณีวันหยุดราชการติดต่อกันมากกว่า 3 วัน\nบุคลากรมีผล HBsAb Positive ให้ NO management",
+    "source": {
+      "version": "revision-3-2026-09-03",
+      "pages": [
+        3
+      ]
+    },
+    "next": [],
+    "enabled": true
+  },
+  {
+    "routeId": "cr.notes",
+    "category": "clinical",
+    "presentation": "text",
+    "text": "กรณีบุคลากรมีค่า Cr ≥ 1.5 mg/dL ให้ปรึกษาอายุรแพทย์ก่อนพิจารณาให้ยา",
+    "source": {
+      "version": "revision-3-2026-09-03",
+      "pages": [
+        3
+      ]
+    },
+    "next": [],
+    "enabled": true
+  },
+  {
+    "routeId": "knowledge.overview",
+    "category": "clinical",
+    "presentation": "text",
+    "text": "เมื่อบุคลากรทางการแพทย์สัมผัสเลือดหรือสารคัดหลั่ง ให้รีบปฐมพยาบาลตามกรณีดังต่อไปนี้\nหลังการปฐมพยาบาล ให้ดำเนินการตามขั้นตอนดังนี้\n1. แจ้งพยาบาลหัวหน้าเวรประจำหน่วยงานที่บุคลากรเกิดอุบัติเหตุ\n2. ซักประวัติรายละเอียดของการสัมผัสความเสี่ยงของผู้ป่วยและบันทึกหลักฐาน",
+    "source": {
+      "version": "revision-3-2026-09-03",
+      "pages": [
+        1
+      ]
+    },
+    "next": [
+      {
+        "routeId": "first_aid.root",
+        "label": "ปฐมพยาบาล"
+      },
+      {
+        "routeId": "lab.source.ic04",
+        "label": "ตรวจเลือดผู้ป่วย"
+      },
+      {
+        "routeId": "opep.request",
+        "label": "ขอเจาะเลือด/ยืนยัน oPEP"
+      },
+      {
+        "routeId": "hepb.notes",
+        "label": "หมายเหตุ Hepatitis B"
+      }
+    ],
+    "enabled": true
+  }
+]
