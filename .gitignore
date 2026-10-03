@@ -1,0 +1,13 @@
+node_modules/
+.wrangler/
+.dev.vars*
+.env*
+!.env.example
+.DS_Store
+dist/
+coverage/
+.superpowers/
+# Original clinical documents stay local.
+/*.pdf
+/*.docx
+/*.jpg

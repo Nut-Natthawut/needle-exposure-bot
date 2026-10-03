@@ -1,0 +1,16 @@
+{
+  "name": "needle-exposure-line-bot",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "engines": { "node": ">=22" },
+  "scripts": {
+    "dev": "wrangler dev",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit",
+    "content:check": "node scripts/validate-content.mjs",
+    "deploy": "npm run content:check && npm run typecheck && npm test && wrangler deploy"
+  },
+  "dependencies": { "ajv": "^8.17.1" },
+  "devDependencies": { "typescript": "^5.9.3", "vitest": "^5.0.3", "wrangler": "^4.147.0", "@cloudflare/workers-types": "^5.20261003.1", "@types/node": "^22.0.0" }
+}
