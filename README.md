@@ -13,10 +13,15 @@ npm run typecheck
 npm run dev
 ```
 
-Current stage: Ticket 2 content corpus. The Worker still returns 404; LINE
+Current stage: Ticket 3 deterministic router. The Worker still returns 404; LINE
 webhook handling is not implemented yet. PDF transcription, alias maps and UI
 copy are under content/. See docs/source-map.md for source pages and disabled
 ambiguous cases.
+
+`src/domain/router.ts` resolves exact menu postbacks and registered text aliases
+without I/O. Ambiguous matches return choices. Follow-ups require the correct
+last route. It normalizes whitespace only; punctuation and spelling variants
+need explicit aliases.
 
 `npm run content:check` checks clinical schema, route IDs, versions, destination
 links and aliases. Test fixtures are not clinical content. Deployment runs

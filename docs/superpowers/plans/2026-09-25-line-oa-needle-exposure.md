@@ -92,6 +92,8 @@
 
 ### Ticket 3: Router สำหรับปุ่มและคำถามพิมพ์ (0.5–1 วัน)
 
+สถานะ: เสร็จ 3 ตุลาคม 2569 — router tests 26/26; รายละเอียดการ normalize และผลตรวจอยู่ใน docs/implementation-progress.md
+
 **Depends on:** Ticket 2
 
 **Files:** Create src/domain/router.ts, tests/router.test.ts

@@ -44,3 +44,19 @@ version tests then failed against the old validator before implementing checks.
 Final content:check, typecheck, and suite passed 16/16. Source map lists the
 conditions and branches; this does not certify the clinical correctness of the
 source or publish the bot. Next: Ticket 3 deterministic router.
+
+Ticket 3: complete (2026-10-03). Added pure resolveAction in src/domain/router.ts
+with route/choices/fallback results. Exact postback IDs are checked first;
+text checks active-context aliases before global aliases. Known follow-ups
+without matching context yield missing_context. Disabled or missing alias
+targets yield unavailable, rather than silently selecting remaining candidates.
+
+Ruling: the spec does not list punctuation that can safely be removed, so only
+trim and whitespace collapse are implemented. Case/punctuation/Thai spelling
+remain exact; additional variants can be registered explicitly. Context expiry
+is the state adapter's job in Ticket 5, not this pure function.
+
+Evidence: initial route tests failed without module; against fallback stub,
+14 behavioral assertions failed before implementation. All 26 router cases
+then passed; complete suite 42/42, typecheck and content:check passed.
+No LINE or Cloudflare deployment occurred. Next: Ticket 4 signature/webhook.
