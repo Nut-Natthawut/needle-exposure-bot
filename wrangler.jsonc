@@ -5,6 +5,7 @@
   "compatibility_date": "2026-10-03",
   "compatibility_flags": ["nodejs_compat"],
   "workers_dev": true,
+  "secrets": { "required": ["LINE_CHANNEL_SECRET", "LINE_CHANNEL_ACCESS_TOKEN"] },
   // Disable automatic invocation logging to avoid retaining webhook metadata.
   "observability": { "enabled": false }
   // STATE_KV will be bound after a real namespace is created at deployment.

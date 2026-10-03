@@ -60,3 +60,30 @@ Evidence: initial route tests failed without module; against fallback stub,
 14 behavioral assertions failed before implementation. All 26 router cases
 then passed; complete suite 42/42, typecheck and content:check passed.
 No LINE or Cloudflare deployment occurred. Next: Ticket 4 signature/webhook.
+
+Ticket 4: complete (2026-10-03). POST /webhook verifies raw bytes using Web
+Crypto HMAC-SHA256 before parsing; missing/invalid signature returns 401.
+Event normalizer accepts repliable message-text/postback/follow only from user
+sources. Group/room and image/file/audio are acknowledged without replies.
+Empty LINE verification events return 200. Reply client awaits fixed LINE API
+POST with a 5-second timeout and no automatic retries, response-body logging,
+or redirect following. HTTP/network failures return generic webhook 502.
+
+Rulings: read webhook bodies with an explicit 256 KiB cap to bound memory.
+Introduce a minimal text/Quick Reply renderer now so reply payloads are usable;
+full Flex styling and reporting/contact actions remain Ticket 6. Preserve each
+clinical text as a separate unmodified text message, with a separate partial
+warning when needed. Add generated Env types from secrets.required (names only)
+instead of handwritten deployment types. No real secrets or KV IDs were added.
+
+Evidence: signature/reply/webhook tests first failed against missing modules
+and then 22 behavioral assertions failed against stubs. Final suite 76/76,
+typecheck and content:check pass; Wrangler dry-run bundle 47.30 KiB. Tests use
+Node HMAC to sign and Web Crypto to verify, and inspect actual outbound HTTP
+payloads with a local fake transport; no LINE requests sent. Logging regression
+checks ensure raw test HN and credentials are not emitted on reply failures.
+
+References: LINE verify-webhook-signature and receiving-messages docs, plus
+Cloudflare secrets.required configuration retrieved 2026-10-03. Actual Worker
+CPU, KV behavior and live LINE delivery are still release-stage checks.
+Next: Ticket 5, short-lived KV context and best-effort event dedup.

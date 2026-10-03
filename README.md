@@ -10,14 +10,15 @@ LINE OA bot: TypeScript + Cloudflare Workers, deterministic JSON routes.
 ```text
 เข็มทิ่มตำ/
 ├── src/                            โค้ดที่รันบน Cloudflare Worker
-│   ├── index.ts                    [ทำแล้ว: scaffold] จุดรับ request/ประกอบระบบ
+│   ├── index.ts                    [ทำแล้ว] POST /webhook และประสานระบบ
 │   ├── domain/                     กฎการเลือกคำตอบและสถานะสนทนา
 │   │   ├── router.ts               [ทำแล้ว] เลือก route / choices / fallback
 │   │   └── state.ts                [รอทำ] บริบทล่าสุดและ event กันซ้ำผ่าน KV
 │   └── line/                       ส่วนเชื่อมต่อ LINE โดยเฉพาะ
-│       ├── signature.ts            [รอทำ] ตรวจผู้ส่ง webhook ด้วย raw body
-│       ├── reply.ts                [รอทำ] ส่งข้อความผ่าน LINE Reply API
-│       └── render.ts               [รอทำ] แปลงคำตอบเป็น text/Flex/Quick Reply
+│       ├── signature.ts            [ทำแล้ว] ตรวจผู้ส่ง webhook ด้วย raw body
+│       ├── reply.ts                [ทำแล้ว] ส่งข้อความผ่าน LINE Reply API
+│       ├── events.ts               [ทำแล้ว] ตรวจชนิด event และแชท 1:1
+│       └── render.ts               [ทำแล้วบางส่วน] text/Quick Reply; รอ Flex ในขั้น 6
 ├── content/                        ข้อมูลตายตัวที่บอตใช้ตอบ
 │   ├── routes.json                 [ทำแล้ว] ข้อความคลินิก/แหล่งอ้างอิง/ทางถัดไป
 │   ├── aliases.json                [ทำแล้ว] คำค้นทั่วไปและคำถามต่อตามบริบท
@@ -48,6 +49,7 @@ LINE OA bot: TypeScript + Cloudflare Workers, deterministic JSON routes.
 ├── package-lock.json               [ทำแล้ว] ล็อกเวอร์ชัน dependencies
 ├── tsconfig.json                   [ทำแล้ว] ตั้งค่า TypeScript
 ├── wrangler.jsonc                  [ทำแล้ว] ตั้งค่า Worker; รอ KV binding จริง
+├── worker-configuration.d.ts        [ทำแล้ว] Env types ที่ Wrangler สร้างจาก config
 ├── .gitignore                      [ทำแล้ว] กัน secrets/เอกสารต้นทางเข้า Git
 └── README.md                       เอกสารนี้
 ```
@@ -97,14 +99,17 @@ Worker ส่วน `install-rich-menu.mjs` ใช้ตั้งเมนูค
 
 ## การตรวจข้อมูลก่อน deploy
 
+รูปแบบการ์ดคำตอบและ Rich Menu ยึดภาพที่ผู้ใช้เลือก ตาม
+[ข้อกำหนดหน้าตาคำตอบ](docs/line-response-style.md) สำหรับ Ticket 6–7
+
 ผู้พัฒนาแก้ `content/*.json` จากเอกสารอ้างอิง แล้วรัน `content:check`, `typecheck`
 และ `test` ให้ผ่านก่อน Wrangler deploy คำตอบ JSON ถูกบรรจุไปพร้อมโค้ด Worker
 ไม่ต้องค้น PDF, อ่าน Google Drive หรือเรียก AI ระหว่างตอบแชท Secrets ของ LINE
 และ HMAC จะเก็บใน Cloudflare secrets; KV binding จะเพิ่มเมื่อสร้าง namespace จริง
 
-สถานะตอนนี้: Tickets 1–3 เสร็จแล้ว (schema, content และ router) แต่ `index.ts`
-ยังคืน 404 เพราะ webhook/reply/state/render ตามลำดับด้านบนยังอยู่ระหว่างพัฒนา
-จึงยังไม่ควรใช้ Worker scaffold นี้เป็น webhook ของ LINE จริง
+สถานะตอนนี้: Tickets 1–4 เสร็จแล้ว (schema, content, router และ webhook/reply)
+ทดสอบการรับ POST /webhook ในเครื่องได้ด้วย secret จำลอง แต่ยังไม่มี KV state,
+Flex styling หรือ Rich Menu และยังไม่ได้ deploy/test กับ LINE จริง
 
 ## Local development
 
@@ -117,8 +122,8 @@ npm run typecheck
 npm run dev
 ```
 
-Current stage: Ticket 3 deterministic router. The Worker still returns 404; LINE
-webhook handling is not implemented yet. PDF transcription, alias maps and UI
+Current stage: Ticket 4 webhook and Reply API. Only POST /webhook is accepted;
+other paths return 404. PDF transcription, alias maps and UI
 copy are under content/. See docs/source-map.md for source pages and disabled
 ambiguous cases.
 
@@ -135,3 +140,21 @@ visually checked transcription; renderer checks will be added in Ticket 6.
 Keep LINE credentials out of Git. Original PDF/DOCX/JPG files remain local and
 are ignored. Add the actual KV namespace and generate binding types with
 `wrangler types` when provisioning in Ticket 8.
+
+Required secret names are declared in wrangler.jsonc, not secret values.
+`npm run types:generate` regenerates Env declarations. Tests use dummy secrets
+and replace only the outbound HTTP transport; they do not contact LINE.
+
+## สิ่งที่เจ้าของบัญชีจะทำเองตอนติดตั้งจริง
+
+เมื่อโค้ดและเมนูพร้อมใน Ticket 8 จะพาตั้งค่าทีละขั้น:
+
+1. เลือก Cloudflare Account ของโปรเจกต์และสร้าง KV namespace จริง
+2. ดู Channel secret/ออก Channel access token ใน LINE Developers แล้วใส่ลง
+   Cloudflare secrets โดยตรง; ไม่ส่งค่าลับลงแชทหรือเก็บใน Git
+3. ตั้ง HMAC secret สำหรับคีย์สถานะและ deploy Worker ไป Account ที่ถูกต้อง
+4. ใส่ Webhook URL /webhook, กด Verify, เปิด Use webhook และ redelivery
+5. ปิดข้อความตอบอัตโนมัติ/ทักทายเดิมเมื่อบอตพร้อมรับหน้าที่ เพื่อไม่ให้ตอบซ้อน
+6. ติดตั้ง Rich Menu แล้วทดสอบบน LINE มือถือกับบัญชีผู้พัฒนา
+
+ยังไม่ต้องเปลี่ยน Webhook URL ตอนนี้ เพราะระบบอยู่ระหว่างพัฒนา

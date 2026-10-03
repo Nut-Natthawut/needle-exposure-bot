@@ -6,6 +6,7 @@
   "engines": { "node": ">=22" },
   "scripts": {
     "dev": "wrangler dev",
+    "types:generate": "wrangler types --include-runtime false",
     "test": "vitest run",
     "typecheck": "tsc --noEmit",
     "content:check": "node scripts/validate-content.mjs",

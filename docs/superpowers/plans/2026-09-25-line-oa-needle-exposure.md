@@ -111,6 +111,8 @@
 
 ### Ticket 4: LINE webhook และการตรวจ signature (1 วัน)
 
+สถานะ: เสร็จ 3 ตุลาคม 2569 — signature/webhook/reply tests และชุดรวม 76/76; คำตอบ text/Quick Reply ชั่วคราว รอ Flex styling ใน Ticket 6; ยังไม่ได้ deploy
+
 **Depends on:** Ticket 3
 
 **Files:** Create src/line/signature.ts, src/line/reply.ts, tests/signature.test.ts, tests/webhook.test.ts; Modify src/index.ts
