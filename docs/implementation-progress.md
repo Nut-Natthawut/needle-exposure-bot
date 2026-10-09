@@ -87,3 +87,29 @@ References: LINE verify-webhook-signature and receiving-messages docs, plus
 Cloudflare secrets.required configuration retrieved 2026-10-03. Actual Worker
 CPU, KV behavior and live LINE delivery are still release-stage checks.
 Next: Ticket 5, short-lived KV context and best-effort event dedup.
+
+Ticket 5: complete (2026-10-09). Added KV adapter with HMAC-SHA256 user keys
+using a separate HMAC_SECRET, context TTL 1800 seconds and SHA-256 event keys
+with TTL 86400 seconds. Values contain only route/expiration or expiration,
+never chat text or raw identifiers. Validate embedded expiration on reads.
+Webhook checks event markers before replying and marks only successful replies;
+updates context only after successful delivery. Explicit reset and successful
+choices/fallback/follow clear context. KV errors never turn delivered replies
+into errors; direct routes still work without KV/HMAC. Request-local caches
+preserve batch ordering and suppress duplicate events within a single request.
+
+Rulings: failed topic writes attempt deletion of old context. Invalidation,
+latest-topic reads and cross-request dedup remain best effort: eventual
+consistency can expose older unexpired records, concurrent requests can both
+reply, and a crash between reply and marker write permits redelivery. TTL
+checks prevent expired context, not all stale context. Strong guarantees need
+a different state store; do not describe KV as a lock or exactly-once delivery.
+Bind STATE_KV locally without a fabricated namespace ID; generate Env from
+config including HMAC_SECRET. Real namespace/secrets are deferred to Ticket 8.
+
+Evidence: missing-module RED then fallback stub RED (9 behavioral failures);
+final suite 105/105 across 9 files, typecheck and content:check passed.
+Wrangler dry-run bundled 51.89 KiB with STATE_KV binding without uploading.
+Failure tests simulate quota/rate-limit/stale-null reads; they do not measure
+actual Cloudflare replication, quotas or CPU. No remote resource or LINE call.
+Next: Ticket 6, Flex replies and navigation.

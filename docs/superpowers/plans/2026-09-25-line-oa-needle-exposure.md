@@ -131,20 +131,22 @@
 
 ### Ticket 5: บริบทล่าสุด, event dedup และ KV fail-open (0.5–1 วัน)
 
+สถานะ: เสร็จ 9 ตุลาคม 2569 — ชุดรวม 105/105 ผ่านในเครื่อง; KV จริง/LINE จริงรอ Ticket 8
+
 **Depends on:** Ticket 4
 
 **Files:** Create src/domain/state.ts, tests/state.test.ts, tests/kv-failure.test.ts; Modify src/index.ts
 
-**Interfaces:** getLastRouteId(userId) → routeId|null; putLastRouteId(userId, routeId) → void; hasReplied(eventId) → boolean; markReplied(eventId) → void; คีย์ userId ต้องเป็น HMAC ไม่ใช่ LINE user ID ตรง
+**Interfaces:** getLastRouteId(userId) → routeId|null; putLastRouteId(userId, routeId), clearLastRouteId(userId), markReplied(eventId) → boolean (ผลบันทึก); hasReplied(eventId) → boolean; ทั้งหมด async; คีย์ userId ต้องเป็น HMAC ไม่ใช่ LINE user ID ตรง
 
-- [ ] เขียน failing tests ว่า context TTL=1800 วินาที, event TTL=86400 วินาที, คีย์ไม่เผย LINE user ID, event ซ้ำหลังตอบสำเร็จไม่ reply อีก, กดหัวข้อใหม่แล้ว context เปลี่ยน และคำสั่งเริ่มใหม่ล้าง context
-- [ ] รัน npm test -- tests/state.test.ts tests/kv-failure.test.ts ให้ล้มเพราะ state ยังไม่มี
-- [ ] เขียน KV adapter และ HMAC key โดยใช้ secret แยกจาก LINE channel secret; hash webhookEventId ก่อนทำ KV key; ตรวจ event ID ก่อนตอบ และ markReplied หลัง Reply API ตอบรับเท่านั้น
-- [ ] จัดการ KV get/put/delete ที่ error หรือเกินโควตา: ถ้า route มาจาก postback/alias ที่ชัดเจนให้ตอบต่อ, ถ้าคำถามต่อจำเป็นต้องใช้ lastRouteId ให้ส่งข้อความขอเลือกหัวข้อใหม่
-- [ ] ทดสอบการกดเร็วที่ทำให้ context key เขียนเกิน 1 ครั้ง/วินาที, การอ่าน stale/null และ Reply API สำเร็จแต่ markReplied ล้มเหลว; ห้ามทิ้งข้อความตอบที่สำเร็จแล้วเพราะ KV error
-- [ ] รัน npm test -- tests/state.test.ts tests/kv-failure.test.ts tests/webhook.test.ts ให้ผ่าน; commit state handling
+- [x] เขียน failing tests ว่า context TTL=1800 วินาที, event TTL=86400 วินาที, คีย์ไม่เผย LINE user ID, event ซ้ำหลังตอบสำเร็จไม่ reply อีก, กดหัวข้อใหม่แล้ว context เปลี่ยน และคำสั่งเริ่มใหม่ล้าง context
+- [x] รัน npm test -- tests/state.test.ts tests/kv-failure.test.ts ให้ล้มเพราะ state ยังไม่มี
+- [x] เขียน KV adapter และ HMAC key โดยใช้ secret แยกจาก LINE channel secret; hash webhookEventId ก่อนทำ KV key; ตรวจ event ID ก่อนตอบ และ markReplied หลัง Reply API ตอบรับเท่านั้น
+- [x] จัดการ KV get/put/delete ที่ error หรือเกินโควตา: ถ้า route มาจาก postback/alias ที่ชัดเจนให้ตอบต่อ, ถ้าคำถามต่อจำเป็นต้องใช้ lastRouteId ให้ส่งข้อความขอเลือกหัวข้อใหม่
+- [x] จำลอง error ของการเขียน key ถี่/เกินโควตา, stale/null reads และ Reply API สำเร็จแต่ markReplied ล้มเหลว; ของจริงต้องตรวจใน Ticket 8
+- [x] รัน npm test -- tests/state.test.ts tests/kv-failure.test.ts tests/webhook.test.ts ให้ผ่าน; commit state handling
 
-**Done when:** การตอบหลักไม่พึ่งความสำเร็จของ KV, ถามต่อไม่ใช้บริบทเก่าหรือคาดเดา และ dedup เป็น best effort ตามสเปก
+**Done when:** การตอบหลักไม่พึ่งความสำเร็จของ KV, ถามต่อไม่ใช้บริบทหมดอายุหรือคาดเดา และ dedup เป็น best effort ตามสเปก; KV อาจคืนบริบทเก่าที่ยังไม่หมดอายุระหว่าง replication จึงไม่รับประกัน latest-context ข้าม requests
 
 ### Ticket 6: รูปแบบคำตอบและการนำทาง (1 วัน)
 

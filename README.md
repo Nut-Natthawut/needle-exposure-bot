@@ -13,7 +13,7 @@ LINE OA bot: TypeScript + Cloudflare Workers, deterministic JSON routes.
 │   ├── index.ts                    [ทำแล้ว] POST /webhook และประสานระบบ
 │   ├── domain/                     กฎการเลือกคำตอบและสถานะสนทนา
 │   │   ├── router.ts               [ทำแล้ว] เลือก route / choices / fallback
-│   │   └── state.ts                [รอทำ] บริบทล่าสุดและ event กันซ้ำผ่าน KV
+│   │   └── state.ts                [ทำแล้ว] บริบทล่าสุดและ event กันซ้ำผ่าน KV
 │   └── line/                       ส่วนเชื่อมต่อ LINE โดยเฉพาะ
 │       ├── signature.ts            [ทำแล้ว] ตรวจผู้ส่ง webhook ด้วย raw body
 │       ├── reply.ts                [ทำแล้ว] ส่งข้อความผ่าน LINE Reply API
@@ -38,11 +38,18 @@ LINE OA bot: TypeScript + Cloudflare Workers, deterministic JSON routes.
 │   ├── content-corpus.test.ts      [ทำแล้ว] route/alias/ปลายทาง/เวอร์ชันถูก
 │   ├── content-snapshot.test.ts    [ทำแล้ว] ข้อความตรง baseline ที่ตรวจแล้ว
 │   ├── router.test.ts              [ทำแล้ว] ปุ่ม/ข้อความ/บริบท/คำกำกวม
+│   ├── signature.test.ts           [ทำแล้ว] ลายเซ็น LINE และ body ถูกแก้
+│   ├── reply.test.ts               [ทำแล้ว] HTTP ที่ส่งให้ LINE และความล้มเหลว
+│   ├── webhook.test.ts             [ทำแล้ว] จำลอง event เข้า Worker ทั้งเส้นทาง
+│   ├── state.test.ts               [ทำแล้ว] TTL/HMAC/ล้างบริบท/event กันซ้ำ
+│   ├── kv-failure.test.ts          [ทำแล้ว] ถามต่อ/กันซ้ำ/KV ล้มเหลวผ่าน webhook
+│   ├── support/memory-kv.ts        [ทำแล้ว] KV จำลองสำหรับ tests ไม่ใช่ฐานข้อมูลจริง
 │   ├── __snapshots__/              [ทำแล้ว] baseline ของข้อความ
-│   └── *.test.ts                   [รอทำเพิ่ม] webhook/state/render/menu/integration
+│   └── *.test.ts                   [รอทำเพิ่ม] Flex-render/menu/integration
 ├── docs/
 │   ├── source-map.md               [ทำแล้ว] แต่ละกรณีอ้าง PDF หน้าไหน/เหตุผลที่ปิด
 │   ├── implementation-progress.md  [ทำแล้ว] ผลตรวจและการตัดสินใจระหว่างพัฒนา
+│   ├── line-response-style.md      [ทำแล้ว] รูปแบบคำตอบตามภาพ reference
 │   ├── release-checklist.md        [รอทำ] ตรวจ LINE จริง/deploy/rollback
 │   └── superpowers/                [ทำแล้ว] specs/ และ plans/ ที่ใช้ดำเนินงาน
 ├── package.json                    [ทำแล้ว] dependencies และคำสั่งพัฒนา
@@ -93,6 +100,13 @@ eventual consistency หาก KV อ่านหรือเขียนไม�
 และการกันซ้ำอาจใช้ไม่ได้; หาก Reply API ล้มเหลว ไม่บันทึก event ว่าสำเร็จ และ
 webhook คืนสถานะล้มเหลวให้ LINE (ต้องเปิด redelivery และไม่รับประกันการตอบซ้ำสำเร็จ)
 
+พิมพ์ “เริ่มใหม่” หรือ postback `ui.reset` เพื่อล้างบริบท; เมื่อได้หลายกรณีให้เลือก
+หรือ fallback จะล้างหัวข้อเดิมหลังตอบสำเร็จเช่นกัน TTL ตรวจจาก `expiresAt` ในค่า
+ด้วย จึงไม่ใช้ค่าที่หมดอายุแม้ KV ยังส่งค่าค้างมา หากเขียนหัวข้อใหม่ไม่ได้จะพยายาม
+ลบหัวข้อเดิม แต่ KV อาจยังอ่านค่าเก่าที่ยังไม่หมดอายุได้ระหว่างแพร่ข้อมูล และ
+event ที่เข้าพร้อมกันอาจตอบซ้ำได้ ไม่รับประกัน latest-context หรือ exactly-once
+ข้าม requests; หากต้องการรับประกันระดับนั้นต้องเปลี่ยนการเก็บสถานะเป็นแบบ strong consistency
+
 ปุ่มรายงานความเสี่ยงเริ่มจาก postback เข้า Worker เพื่อส่งคำเตือนก่อน ผู้ใช้กด
 ปุ่มเปิดฟอร์มในคำตอบแล้ว LINE เปิด Google Form โดยตรง ข้อมูลที่กรอกฟอร์มไม่ผ่าน
 Worker ส่วน `install-rich-menu.mjs` ใช้ตั้งเมนูครั้งเดียวตอนติดตั้ง ไม่รันทุกข้อความ
@@ -105,11 +119,42 @@ Worker ส่วน `install-rich-menu.mjs` ใช้ตั้งเมนูค
 ผู้พัฒนาแก้ `content/*.json` จากเอกสารอ้างอิง แล้วรัน `content:check`, `typecheck`
 และ `test` ให้ผ่านก่อน Wrangler deploy คำตอบ JSON ถูกบรรจุไปพร้อมโค้ด Worker
 ไม่ต้องค้น PDF, อ่าน Google Drive หรือเรียก AI ระหว่างตอบแชท Secrets ของ LINE
-และ HMAC จะเก็บใน Cloudflare secrets; KV binding จะเพิ่มเมื่อสร้าง namespace จริง
+และ HMAC จะเก็บใน Cloudflare secrets; config มี binding สำหรับ KV ในเครื่องแล้ว
+แต่ยังไม่มี namespace ID จริง ต้องผูก namespace ก่อน deploy
 
-สถานะตอนนี้: Tickets 1–4 เสร็จแล้ว (schema, content, router และ webhook/reply)
-ทดสอบการรับ POST /webhook ในเครื่องได้ด้วย secret จำลอง แต่ยังไม่มี KV state,
+สถานะตอนนี้: Tickets 1–5 เสร็จแล้ว (schema, content, router, webhook/reply และ KV state)
+ทดสอบการรับ POST /webhook และสถานะได้ในเครื่องด้วย secret/KV จำลอง ยังไม่มี
 Flex styling หรือ Rich Menu และยังไม่ได้ deploy/test กับ LINE จริง
+
+## เข้าใจสถานะและการทดสอบในตอนนี้
+
+ตอนนี้ทำตัวบอตจริงไปพร้อมกับ tests แล้ว ไม่ได้เขียนแต่ tests:
+มีคลังคำตอบจาก PDF, ตัวเลือก route, ตัวรับ webhook, ตัวตรวจ signature และ
+ตัวส่ง Reply API และระบบจำบริบท/กันซ้ำแล้ว เหลือการ์ด Flex, Rich Menu และติดตั้งจริง
+
+การทดสอบในเครื่องส่ง event จำลองเข้าโค้ดจริง เช่นคำถาม “เลือดเข้าตา”
+พร้อมลายเซ็นที่สร้างด้วย secret ทดสอบ แล้วตรวจว่าโค้ดสร้าง HTTP request ไปยัง
+Reply API ด้วยข้อความที่ตรง routes.json หรือไม่ จุดส่ง HTTP ถูกแทนด้วยตัวรับ
+จำลองที่เก็บ payload ให้ตรวจ; ไม่มีการเรียก LINE จริงหรือส่งข้อความถึงผู้ใช้
+
+| ตรวจอะไร | ตัวอย่าง | ยืนยันอะไรได้ |
+| --- | --- | --- |
+| Schema/คลังข้อมูล | route ขาด source หรือชี้ปลายทางที่ไม่มี | ตัวตรวจปฏิเสธข้อมูลไม่ครบ |
+| Snapshot | ข้อความจาก routes.json เปลี่ยนไปจาก baseline | ตรวจจับการเปลี่ยนข้อความที่ตรึงไว้ ไม่รับรองแพทย์ |
+| Router | “PEP” ตรงสองกรณี | ให้เลือกแทนการเลือกกรณีเอง |
+| Signature | เปลี่ยน body หลังเซ็น | ปฏิเสธ request โดยไม่ตอบ LINE |
+| Webhook/Reply | event จริงรูปแบบ LINE และจำลอง API 500 | ส่ง payload ถูกและจัดการความล้มเหลว |
+| KV state | ถาม “ผลบวก” ต่อหลัง “การเจาะเลือด”, event เดิมส่งซ้ำ | ใช้หัวข้อล่าสุด/หมดอายุ/ไม่ตอบ event ที่บันทึกแล้ว ใน KV จำลอง |
+| Typecheck | เรียกฟังก์ชันด้วยชนิดข้อมูลผิด | TypeScript ตรวจความเข้ากันได้ของโค้ด |
+| Build dry-run | รวมโค้ดเป็น Worker bundle | ประกอบไฟล์ได้ โดยยังไม่อัปโหลด Cloudflare |
+
+ผลล่าสุดคือ 105 test cases ใน 9 test files ผ่านทั้งหมด ไม่ใช่การทดลองแชทใน LINE
+105 ครั้ง และไม่รับประกันระบบ production ครบทุกด้าน ยังต้องทดสอบบน Cloudflare
+จริงและ LINE มือถือ เช่นการแสดงการ์ด/ปุ่ม, KV, ความเร็ว/CPU, การหมดอายุบริบท
+และ Google Form ใน Ticket 8
+
+ขั้นถัดไปคือ Ticket 6: การ์ดคำตอบ Flex และปุ่มนำทางตามภาพ reference
+ส่วน namespace จริงและการทดสอบ LINE มือถือจะทำตอนติดตั้งใน Ticket 8
 
 ## Local development
 

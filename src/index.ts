@@ -6,6 +6,12 @@ import { reply, type Fetcher } from './line/reply';
 import { verifyLineSignature } from './line/signature';
 import { isRecord, parseEvent } from './line/events';
 import { renderText } from './line/render';
+import { createState, type StateKV } from './domain/state';
+
+type RuntimeEnv = Pick<Env, 'LINE_CHANNEL_SECRET' | 'LINE_CHANNEL_ACCESS_TOKEN'> & {
+  STATE_KV?: StateKV;
+  HMAC_SECRET?: string;
+};
 
 const MAX_BODY_BYTES = 256 * 1024;
 
@@ -29,8 +35,8 @@ async function readBody(request: Request): Promise<ArrayBuffer | null> {
   return buffer.buffer;
 }
 
-export function createWebhookHandler(fetcher: Fetcher = fetch) {
-  return async (request: Request, env: Env): Promise<Response> => {
+export function createWebhookHandler(fetcher: Fetcher = fetch, now = Date.now) {
+  return async (request: Request, env: RuntimeEnv): Promise<Response> => {
     if (new URL(request.url).pathname !== '/webhook') return new Response('Not Found', {status:404});
     if (request.method !== 'POST') return new Response('Method Not Allowed', {status:405, headers:{Allow:'POST'}});
     if (!env.LINE_CHANNEL_SECRET) return new Response('Configuration unavailable', {status:503});
@@ -45,13 +51,22 @@ export function createWebhookHandler(fetcher: Fetcher = fetch) {
     catch {return new Response('Invalid JSON', {status:400});}
     if (!isRecord(body) || !Array.isArray(body.events)) return new Response('Invalid events', {status:400});
     let failed = false;
+    const state = createState(env.STATE_KV, env.HMAC_SECRET, now);
     for (const rawEvent of body.events) {
       const event = parseEvent(rawEvent);
       if (!event) continue;
+      if (await state.hasReplied(event.eventId)) continue;
+      const reset = event.action.kind === 'text' ? event.action.value.trim() === 'เริ่มใหม่'
+        : event.action.kind === 'postback' && event.action.value === 'ui.reset';
+      const resolution = event.action.kind === 'follow' || reset ? null
+        : resolveAction({...event.action, lastRouteId:await state.getLastRouteId(event.userId) ?? undefined}, routes, aliases);
       const messages = event.action.kind === 'follow' ? [{type:'text' as const, text:ui.welcome}]
-        : renderText(resolveAction(event.action, routes, aliases));
+        : reset ? [{type:'text' as const, text:ui.reset}] : renderText(resolution!);
       const result = await reply(event.replyToken, messages, env.LINE_CHANNEL_ACCESS_TOKEN, fetcher);
-      if (!result.ok) failed = true;
+      if (!result.ok) {failed = true; continue;}
+      await state.markReplied(event.eventId);
+      if (resolution?.kind === 'route') await state.putLastRouteId(event.userId, resolution.route.routeId);
+      else await state.clearLastRouteId(event.userId);
     }
     return new Response(failed ? 'Reply failed' : 'OK', {status:failed ? 502 : 200});
   };
@@ -60,6 +75,3 @@ export function createWebhookHandler(fetcher: Fetcher = fetch) {
 export default {
   fetch: createWebhookHandler(),
 } satisfies ExportedHandler<Env>;
-
-// Contract for the later state adapter; not a claim about deployed bindings.
-export type StateStore = { STATE_KV: KVNamespace };
