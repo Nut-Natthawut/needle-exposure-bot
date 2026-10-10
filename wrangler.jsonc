@@ -5,6 +5,8 @@
   "compatibility_date": "2026-10-03",
   "compatibility_flags": ["nodejs_compat"],
   "workers_dev": true,
+  // Temporary probe for the live reply failure; remove after diagnosis.
+  "vars": { "REPLY_DIAGNOSTICS": "enabled" },
   "secrets": { "required": ["LINE_CHANNEL_SECRET", "LINE_CHANNEL_ACCESS_TOKEN", "HMAC_SECRET"] },
   // Namespace IDs identify resources; they are not access tokens or secrets.
   "kv_namespaces": [{ "binding": "STATE_KV", "id": "22668052e5c04b4b8747950bcef98060" }],

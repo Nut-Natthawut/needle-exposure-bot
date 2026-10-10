@@ -11,6 +11,7 @@ import { createState, type StateKV } from './domain/state';
 type RuntimeEnv = Pick<Env, 'LINE_CHANNEL_SECRET' | 'LINE_CHANNEL_ACCESS_TOKEN'> & {
   STATE_KV?: StateKV;
   HMAC_SECRET?: string;
+  REPLY_DIAGNOSTICS?: string;
 };
 
 const MAX_BODY_BYTES = 256 * 1024;
@@ -63,7 +64,14 @@ export function createWebhookHandler(fetcher: Fetcher = fetch, now = Date.now) {
       const messages = event.action.kind === 'follow' ? [{type:'text' as const, text:ui.welcome}]
         : reset ? [{type:'text' as const, text:ui.reset}] : renderText(resolution!);
       const result = await reply(event.replyToken, messages, env.LINE_CHANNEL_ACCESS_TOKEN, fetcher);
-      if (!result.ok) {failed = true; continue;}
+      if (!result.ok) {
+        // Temporary live probe: never log body, identifiers, credentials or exceptions.
+        if (env.REPLY_DIAGNOSTICS === 'enabled') {
+          console.warn('[DEBUG-reply-502]', JSON.stringify({code:result.code, status:result.status ?? null}));
+        }
+        failed = true;
+        continue;
+      }
       await state.markReplied(event.eventId);
       if (resolution?.kind === 'route') await state.putLastRouteId(event.userId, resolution.route.routeId);
       else await state.clearLastRouteId(event.userId);

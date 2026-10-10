@@ -113,3 +113,12 @@ Wrangler dry-run bundled 51.89 KiB with STATE_KV binding without uploading.
 Failure tests simulate quota/rate-limit/stale-null reads; they do not measure
 actual Cloudflare replication, quotas or CPU. No remote resource or LINE call.
 Next: Ticket 6, Flex replies and navigation.
+
+2026-10-10: User moved pilot deployment from Ticket 8 ahead of Tickets 6–7.
+Webhook Verify succeeds but real chat receives webhook 502. Temporary narrow
+reply diagnostics authorized by user, following Matt Pocock diagnosing-bugs.
+Added gated [DEBUG-reply-502] code/status warning and config flag; persistent
+observability remains disabled. Diagnostic tests first failed 5 assertions;
+full suite now 112/112, typecheck/content validation and dry-run pass.
+Actual upstream result must be captured before proposing a root-cause fix.
+See reply-failure-diagnosis.md; diagnosis and debug cleanup remain unfinished.

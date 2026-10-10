@@ -105,3 +105,49 @@ it('never writes raw question or credentials to application logs on reply failur
     expect(emitted).not.toContain('test-reply-token');
   } finally {logs.forEach(log => log.mockRestore());}
 });
+it.each([400, 401, 429])('diagnostic reports the upstream HTTP %i rather than only webhook 502', async upstreamStatus => {
+  const log = vi.spyOn(console, 'warn').mockImplementation(() => {});
+  try {
+    const handler = createWebhookHandler(async () => new Response('private response body', {status:upstreamStatus}));
+    const e = {...event(), message:{id:'test',type:'text',text:'HN 12345 ชื่อทดสอบ'}};
+    const response = await handler(request(JSON.stringify({events:[e]})), {...env, REPLY_DIAGNOSTICS:'enabled'});
+    expect(response.status).toBe(502);
+    expect(log.mock.calls).toEqual([['[DEBUG-reply-502]', JSON.stringify({code:'http_error', status:upstreamStatus})]]);
+    const emitted = JSON.stringify(log.mock.calls);
+    for (const privateValue of ['private response body', 'HN 12345', env.LINE_CHANNEL_SECRET, env.LINE_CHANNEL_ACCESS_TOKEN, 'test-user', 'test-reply-token', 'test-event']) {
+      expect(emitted).not.toContain(privateValue);
+    }
+  } finally {log.mockRestore();}
+});
+it('diagnostic distinguishes network failure without logging exception text', async () => {
+  const log = vi.spyOn(console, 'warn').mockImplementation(() => {});
+  try {
+    const handler = createWebhookHandler(async () => {throw new Error('private access token');});
+    expect((await handler(request(JSON.stringify({events:[event()]})), {...env, REPLY_DIAGNOSTICS:'enabled'})).status).toBe(502);
+    expect(log.mock.calls).toEqual([['[DEBUG-reply-502]', '{"code":"network_error","status":null}']]);
+  } finally {log.mockRestore();}
+});
+it('diagnostic distinguishes local validation failure before HTTP', async () => {
+  const log = vi.spyOn(console, 'warn').mockImplementation(() => {});
+  try {
+    const response = await handle(request(JSON.stringify({events:[event()]})), {...env, LINE_CHANNEL_ACCESS_TOKEN:'', REPLY_DIAGNOSTICS:'enabled'});
+    expect(response.status).toBe(502);
+    expect(received).toHaveLength(0);
+    expect(log.mock.calls).toEqual([['[DEBUG-reply-502]', '{"code":"invalid_request","status":null}']]);
+  } finally {log.mockRestore();}
+});
+it('does not emit diagnostic on a successful reply', async () => {
+  const log = vi.spyOn(console, 'warn').mockImplementation(() => {});
+  try {
+    expect((await handle(request(JSON.stringify({events:[event()]})), {...env, REPLY_DIAGNOSTICS:'enabled'})).status).toBe(200);
+    expect(log.mock.calls).toEqual([]);
+  } finally {log.mockRestore();}
+});
+it('keeps diagnostic disabled unless explicitly enabled', async () => {
+  const log = vi.spyOn(console, 'warn').mockImplementation(() => {});
+  try {
+    status = 401;
+    expect((await handle(request(JSON.stringify({events:[event()]})), env)).status).toBe(502);
+    expect(log.mock.calls).toEqual([]);
+  } finally {log.mockRestore();}
+});

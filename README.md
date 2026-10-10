@@ -148,13 +148,19 @@ Reply API ด้วยข้อความที่ตรง routes.json หร
 | Typecheck | เรียกฟังก์ชันด้วยชนิดข้อมูลผิด | TypeScript ตรวจความเข้ากันได้ของโค้ด |
 | Build dry-run | รวมโค้ดเป็น Worker bundle | ประกอบไฟล์ได้ โดยยังไม่อัปโหลด Cloudflare |
 
-ผลล่าสุดคือ 105 test cases ใน 9 test files ผ่านทั้งหมด ไม่ใช่การทดลองแชทใน LINE
-105 ครั้ง และไม่รับประกันระบบ production ครบทุกด้าน ยังต้องทดสอบบน Cloudflare
+ผลล่าสุดคือ 112 test cases ใน 9 test files ผ่านทั้งหมด ไม่ใช่การทดลองแชทใน LINE
+112 ครั้ง และไม่รับประกันระบบ production ครบทุกด้าน ยังต้องทดสอบบน Cloudflare
 จริงและ LINE มือถือ เช่นการแสดงการ์ด/ปุ่ม, KV, ความเร็ว/CPU, การหมดอายุบริบท
 และ Google Form ใน Ticket 8
 
 ขั้นถัดไปคือ Ticket 6: การ์ดคำตอบ Flex และปุ่มนำทางตามภาพ reference
 ส่วน namespace จริงและการทดสอบ LINE มือถือจะทำตอนติดตั้งใน Ticket 8
+
+อัปเดตการทดลอง deploy (10 ต.ค. 2569): ผู้ใช้เริ่ม Ticket 8 ก่อนงานหน้าตา
+และพบ webhook 502 ตอนส่ง Reply ขณะนี้มี diagnostic ชั่วคราวเฉพาะ error code/status
+เปิดด้วย `REPLY_DIAGNOSTICS=enabled`; ไม่เก็บข้อความ/ค่าลับ และยังคงปิด persistent logs
+รายละเอียดและวิธีตรวจอยู่ใน [บันทึก diagnosis](docs/reply-failure-diagnosis.md)
+ยังไม่ยืนยันว่าพบต้นเหตุหรือแก้ปัญหาจริงแล้ว
 
 ## Local development
 
