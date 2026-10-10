@@ -122,3 +122,13 @@ observability remains disabled. Diagnostic tests first failed 5 assertions;
 full suite now 112/112, typecheck/content validation and dry-run pass.
 Actual upstream result must be captured before proposing a root-cause fix.
 See reply-failure-diagnosis.md; diagnosis and debug cleanup remain unfinished.
+
+2026-10-10 reply investigation: live probe captured network_error/status null.
+Reproduced native workerd exception: unsupported redirect:error. Three real
+transport regression tests failed before changing to redirect:manual, then
+passed; signed full webhook runtime test also passes. Fake transport remains
+only at the external HTTP boundary, not at Workers fetch. No redirects are
+followed. Full suite 116/116; typecheck/content:check/dry-run pass. Patched dev
+toolchain resolves sharp-related audit findings (zero remaining advisories).
+Await live deployment/chat confirmation before declaring the bot fixed and
+removing temporary diagnostic instrumentation. Source clinical content unchanged.

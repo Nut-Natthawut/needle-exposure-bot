@@ -40,6 +40,7 @@ LINE OA bot: TypeScript + Cloudflare Workers, deterministic JSON routes.
 │   ├── router.test.ts              [ทำแล้ว] ปุ่ม/ข้อความ/บริบท/คำกำกวม
 │   ├── signature.test.ts           [ทำแล้ว] ลายเซ็น LINE และ body ถูกแก้
 │   ├── reply.test.ts               [ทำแล้ว] HTTP ที่ส่งให้ LINE และความล้มเหลว
+│   ├── reply-runtime.test.ts       [ทำแล้ว] native Workers fetch/redirect และ signed webhook
 │   ├── webhook.test.ts             [ทำแล้ว] จำลอง event เข้า Worker ทั้งเส้นทาง
 │   ├── state.test.ts               [ทำแล้ว] TTL/HMAC/ล้างบริบท/event กันซ้ำ
 │   ├── kv-failure.test.ts          [ทำแล้ว] ถามต่อ/กันซ้ำ/KV ล้มเหลวผ่าน webhook
@@ -148,8 +149,8 @@ Reply API ด้วยข้อความที่ตรง routes.json หร
 | Typecheck | เรียกฟังก์ชันด้วยชนิดข้อมูลผิด | TypeScript ตรวจความเข้ากันได้ของโค้ด |
 | Build dry-run | รวมโค้ดเป็น Worker bundle | ประกอบไฟล์ได้ โดยยังไม่อัปโหลด Cloudflare |
 
-ผลล่าสุดคือ 112 test cases ใน 9 test files ผ่านทั้งหมด ไม่ใช่การทดลองแชทใน LINE
-112 ครั้ง และไม่รับประกันระบบ production ครบทุกด้าน ยังต้องทดสอบบน Cloudflare
+ผลล่าสุดคือ 116 test cases ใน 10 test files ผ่านทั้งหมด ไม่ใช่การทดลองแชทใน LINE
+116 ครั้ง และไม่รับประกันระบบ production ครบทุกด้าน ยังต้องทดสอบบน Cloudflare
 จริงและ LINE มือถือ เช่นการแสดงการ์ด/ปุ่ม, KV, ความเร็ว/CPU, การหมดอายุบริบท
 และ Google Form ใน Ticket 8
 
@@ -160,7 +161,8 @@ Reply API ด้วยข้อความที่ตรง routes.json หร
 และพบ webhook 502 ตอนส่ง Reply ขณะนี้มี diagnostic ชั่วคราวเฉพาะ error code/status
 เปิดด้วย `REPLY_DIAGNOSTICS=enabled`; ไม่เก็บข้อความ/ค่าลับ และยังคงปิด persistent logs
 รายละเอียดและวิธีตรวจอยู่ใน [บันทึก diagnosis](docs/reply-failure-diagnosis.md)
-ยังไม่ยืนยันว่าพบต้นเหตุหรือแก้ปัญหาจริงแล้ว
+พบ runtime defect แล้ว: native Workers fetch ปฏิเสธ `redirect:error` จึงเปลี่ยนเป็น
+`manual` และเพิ่ม runtime regression tests; ยังรอยืนยันการตอบบน LINE จริงหลัง deploy
 
 ## Local development
 

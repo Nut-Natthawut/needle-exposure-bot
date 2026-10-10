@@ -10,7 +10,8 @@ export async function reply(replyToken: string, messages: TextMessage[], accessT
       method:'POST',
       headers:{'Content-Type':'application/json', Authorization:`Bearer ${accessToken}`},
       body:JSON.stringify({replyToken, messages}),
-      redirect:'error',
+      // Workers fetch rejects 'error'. Manual keeps redirects from forwarding credentials.
+      redirect:'manual',
       signal:AbortSignal.timeout(5000),
     });
     // Do not read/log response bodies: they may echo request details.
