@@ -2,7 +2,18 @@ node_modules/
 .wrangler/
 .dev.vars*
 .env*
-!.env.example
+# Do not allow example env files to accidentally carry real credentials.
+.aws/
+.codex/
+.agents/
+.ssh/
+secrets/
+credentials/
+*.pem
+*.key
+*.p12
+*.pfx
+*.log
 .DS_Store
 dist/
 coverage/

@@ -55,7 +55,7 @@ LINE OA bot: TypeScript + Cloudflare Workers, deterministic JSON routes.
 ├── package.json                    [ทำแล้ว] dependencies และคำสั่งพัฒนา
 ├── package-lock.json               [ทำแล้ว] ล็อกเวอร์ชัน dependencies
 ├── tsconfig.json                   [ทำแล้ว] ตั้งค่า TypeScript
-├── wrangler.jsonc                  [ทำแล้ว] ตั้งค่า Worker; รอ KV binding จริง
+├── wrangler.jsonc                  [ทำแล้ว] ตั้งค่า Worker และ Namespace ID ของ KV
 ├── worker-configuration.d.ts        [ทำแล้ว] Env types ที่ Wrangler สร้างจาก config
 ├── .gitignore                      [ทำแล้ว] กัน secrets/เอกสารต้นทางเข้า Git
 └── README.md                       เอกสารนี้
@@ -119,8 +119,8 @@ Worker ส่วน `install-rich-menu.mjs` ใช้ตั้งเมนูค
 ผู้พัฒนาแก้ `content/*.json` จากเอกสารอ้างอิง แล้วรัน `content:check`, `typecheck`
 และ `test` ให้ผ่านก่อน Wrangler deploy คำตอบ JSON ถูกบรรจุไปพร้อมโค้ด Worker
 ไม่ต้องค้น PDF, อ่าน Google Drive หรือเรียก AI ระหว่างตอบแชท Secrets ของ LINE
-และ HMAC จะเก็บใน Cloudflare secrets; config มี binding สำหรับ KV ในเครื่องแล้ว
-แต่ยังไม่มี namespace ID จริง ต้องผูก namespace ก่อน deploy
+และ HMAC จะเก็บใน Cloudflare secrets; config มี binding `STATE_KV` และ Namespace ID
+ที่ผู้ใช้สร้างแล้ว แต่ยังต้องตรวจ Account และตั้ง secrets ก่อน deploy
 
 สถานะตอนนี้: Tickets 1–5 เสร็จแล้ว (schema, content, router, webhook/reply และ KV state)
 ทดสอบการรับ POST /webhook และสถานะได้ในเครื่องด้วย secret/KV จำลอง ยังไม่มี

@@ -6,8 +6,8 @@
   "compatibility_flags": ["nodejs_compat"],
   "workers_dev": true,
   "secrets": { "required": ["LINE_CHANNEL_SECRET", "LINE_CHANNEL_ACCESS_TOKEN", "HMAC_SECRET"] },
-  // Local binding only. Add the real namespace ID before deployment (Ticket 8).
-  "kv_namespaces": [{ "binding": "STATE_KV" }],
+  // Namespace IDs identify resources; they are not access tokens or secrets.
+  "kv_namespaces": [{ "binding": "STATE_KV", "id": "22668052e5c04b4b8747950bcef98060" }],
   // Disable automatic invocation logging to avoid retaining webhook metadata.
   "observability": { "enabled": false }
 }
