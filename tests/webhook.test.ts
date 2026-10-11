@@ -3,11 +3,12 @@ import { beforeEach, expect, it, vi } from 'vitest';
 import { createWebhookHandler } from '../src/index';
 import routes from '../content/routes.json';
 import ui from '../content/ui.json';
-import type { Fetcher } from '../src/line/reply';
+import type { Fetcher, ReplyMessage } from '../src/line/reply';
+import { clinicalText, componentText } from './support/rendered-content';
 
 const env = {LINE_CHANNEL_SECRET: 'test-secret', LINE_CHANNEL_ACCESS_TOKEN: 'test-access-token'};
 const event = () => ({type:'message', timestamp: 1, webhookEventId:'test-event', deliveryContext:{isRedelivery:false}, source:{type:'user', userId:'test-user'}, replyToken:'test-reply-token', message:{id:'test-message', type:'text', text:'เลือดเข้าตา'}});
-const received: {replyToken: string; messages: {type: string; text: string}[]}[] = [];
+const received: {replyToken: string; messages: ReplyMessage[]}[] = [];
 let status = 200;
 const fetcher: Fetcher = async (_url, init) => { received.push(JSON.parse(String(init.body))); return new Response('{}', {status}); };
 const handle = createWebhookHandler(fetcher);
@@ -22,26 +23,28 @@ it('accepts a signed empty verification request without calling LINE', async () 
 it('routes a signed text event and replies with unchanged corpus text', async () => {
   expect((await handle(request(JSON.stringify({events:[event()]})), env)).status).toBe(200);
   expect(received).toHaveLength(1);
-  expect(received[0]?.messages[0]?.text).toBe(routes.find(r => r.routeId === 'first_aid.eye')?.text);
+  expect(clinicalText(received[0]?.messages[0]!)).toBe(routes.find(r => r.routeId === 'first_aid.eye')?.text);
 });
 it('routes a signed 1:1 postback', async () => {
   const e = {...event(), type:'postback', postback:{data:'first_aid.mouth'}};
   expect((await handle(request(JSON.stringify({events:[e]})), env)).status).toBe(200);
-  expect(received[0]?.messages[0]?.text).toBe(routes.find(r => r.routeId === 'first_aid.mouth')?.text);
+  expect(clinicalText(received[0]?.messages[0]!)).toBe(routes.find(r => r.routeId === 'first_aid.mouth')?.text);
 });
 it('welcomes a 1:1 follow event from fixed UI copy', async () => {
   expect((await handle(request(JSON.stringify({events:[{...event(), type:'follow'}]})), env)).status).toBe(200);
-  expect(received[0]?.messages[0]?.text).toBe(ui.welcome);
+  expect(clinicalText(received[0]?.messages[0]!)).toBe(ui.welcome);
 });
 it.each(['group', 'room'])('ignores %s source with no reply', async type => {
   const e = {...event(), source:{type, groupId:'test-group'}};
   expect((await handle(request(JSON.stringify({events:[e]})), env)).status).toBe(200);
   expect(received).toHaveLength(0);
 });
-it.each(['image', 'file', 'audio'])('ignores unsupported %s message with no clinical reply', async type => {
+it.each(['image', 'file', 'audio'])('responds to unsupported %s with fixed UI copy, not clinical advice', async type => {
   const e = {...event(), message:{type,id:'test-message'}};
   expect((await handle(request(JSON.stringify({events:[e]})), env)).status).toBe(200);
-  expect(received).toHaveLength(0);
+  expect(received).toHaveLength(1);
+  expect(received[0]?.messages[0]).toMatchObject({type:'text',text:ui.unsupported});
+  expect(received[0]?.messages[1]?.type).toBe('flex');
 });
 it('rejects tampered body before parsing even when it is invalid JSON', async () => {
   expect((await handle(request('not JSON', 'invalid'), env)).status).toBe(401);
@@ -88,8 +91,10 @@ it('limits request body size before parsing or replying', async () => {
 it('preserves clinical text and adds a separate partial-content warning', async () => {
   const e = {...event(), message:{id:'test',type:'text',text:'การเจาะเลือด'}};
   expect((await handle(request(JSON.stringify({events:[e]})), env)).status).toBe(200);
-  expect(received[0]?.messages[0]?.text).toBe(routes.find(r => r.routeId === 'lab.source.ic04')?.text);
-  expect(received[0]?.messages[1]?.text).toBe(ui.partialContent);
+  expect(clinicalText(received[0]?.messages[0]!)).toBe(routes.find(r => r.routeId === 'lab.source.ic04')?.text);
+  const message = received[0]?.messages[0];
+  expect(message?.type).toBe('flex');
+  if (message?.type === 'flex') expect(componentText(message.contents.body)).toContain(ui.partialContent);
 });
 it('never writes raw question or credentials to application logs on reply failure', async () => {
   const logs = [vi.spyOn(console, 'log').mockImplementation(() => {}), vi.spyOn(console, 'error').mockImplementation(() => {}), vi.spyOn(console, 'warn').mockImplementation(() => {})];

@@ -1,5 +1,7 @@
 import { expect, it } from 'vitest';
 import { reply, type Fetcher } from '../src/line/reply';
+import { renderRoute } from '../src/line/render';
+import routes from '../content/routes.json';
 
 it('sends the actual Reply API request with bearer authentication and fixed text', async () => {
   const requests: {url: string; init: RequestInit}[] = [];
@@ -27,4 +29,10 @@ it('does not attempt HTTP when required credentials are absent', async () => {
   const fetcher: Fetcher = async () => {calls++; return new Response('{}');};
   expect(await reply('test', [{type:'text', text:'test'}], '', fetcher)).toEqual({ok:false, code:'invalid_request'});
   expect(calls).toBe(0);
+});
+it('sends the Flex payload produced by the real renderer instead of rejecting it as missing text', async () => {
+  const messages = renderRoute({...routes.find(r=>r.routeId==='notify')!,presentation:'flex'});
+  let payload:unknown;
+  expect(await reply('test',messages,'test',async (_url, init)=>{payload=JSON.parse(String(init.body)); return new Response('{}');})).toEqual({ok:true});
+  expect(payload).toEqual({replyToken:'test',messages});
 });

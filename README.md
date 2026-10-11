@@ -18,7 +18,7 @@ LINE OA bot: TypeScript + Cloudflare Workers, deterministic JSON routes.
 │       ├── signature.ts            [ทำแล้ว] ตรวจผู้ส่ง webhook ด้วย raw body
 │       ├── reply.ts                [ทำแล้ว] ส่งข้อความผ่าน LINE Reply API
 │       ├── events.ts               [ทำแล้ว] ตรวจชนิด event และแชท 1:1
-│       └── render.ts               [ทำแล้วบางส่วน] text/Quick Reply; รอ Flex ในขั้น 6
+│       └── render.ts               [ทำแล้ว] text/Flex/Quick Reply และปุ่มนำทาง
 ├── content/                        ข้อมูลตายตัวที่บอตใช้ตอบ
 │   ├── routes.json                 [ทำแล้ว] ข้อความคลินิก/แหล่งอ้างอิง/ทางถัดไป
 │   ├── aliases.json                [ทำแล้ว] คำค้นทั่วไปและคำถามต่อตามบริบท
@@ -44,13 +44,17 @@ LINE OA bot: TypeScript + Cloudflare Workers, deterministic JSON routes.
 │   ├── webhook.test.ts             [ทำแล้ว] จำลอง event เข้า Worker ทั้งเส้นทาง
 │   ├── state.test.ts               [ทำแล้ว] TTL/HMAC/ล้างบริบท/event กันซ้ำ
 │   ├── kv-failure.test.ts          [ทำแล้ว] ถามต่อ/กันซ้ำ/KV ล้มเหลวผ่าน webhook
+│   ├── render.test.ts              [ทำแล้ว] การ์ด/ข้อความครบ/คำเตือน/ข้อจำกัด LINE
+│   ├── navigation.test.ts          [ทำแล้ว] เมนู/ถามต่อ/เปลี่ยนหัวข้อ/ทุกปุ่มไปถึงคำตอบ
 │   ├── support/memory-kv.ts        [ทำแล้ว] KV จำลองสำหรับ tests ไม่ใช่ฐานข้อมูลจริง
+│   ├── support/rendered-content.ts [ทำแล้ว] อ่านข้อความจาก payload เพื่อเทียบต้นฉบับ
 │   ├── __snapshots__/              [ทำแล้ว] baseline ของข้อความ
-│   └── *.test.ts                   [รอทำเพิ่ม] Flex-render/menu/integration
+│   └── *.test.ts                   [รอทำเพิ่ม] Rich Menu/release integration
 ├── docs/
 │   ├── source-map.md               [ทำแล้ว] แต่ละกรณีอ้าง PDF หน้าไหน/เหตุผลที่ปิด
 │   ├── implementation-progress.md  [ทำแล้ว] ผลตรวจและการตัดสินใจระหว่างพัฒนา
 │   ├── line-response-style.md      [ทำแล้ว] รูปแบบคำตอบตามภาพ reference
+│   ├── content-review.md           [ทำแล้ว] ผลตรวจคำตอบ/ข้อจำกัด/รายการลองบนมือถือ
 │   ├── release-checklist.md        [รอทำ] ตรวจ LINE จริง/deploy/rollback
 │   └── superpowers/                [ทำแล้ว] specs/ และ plans/ ที่ใช้ดำเนินงาน
 ├── package.json                    [ทำแล้ว] dependencies และคำสั่งพัฒนา
@@ -80,7 +84,8 @@ Worker นั้น ไม่ใช่เซิร์ฟเวอร์หรื
    แล้วให้ `line/signature.ts` ตรวจ signature จาก raw body ก่อน JSON.parse
    ถ้าตรวจไม่ผ่าน ตอบ HTTP 401 และหยุดโดยไม่อ่าน KV หรือส่งคำตอบ
 3. `index.ts` เลือกเฉพาะ event ที่รองรับในแชท 1:1; event จาก group/room
-   หรือรูป/เสียง/ไฟล์จะไม่ถูกนำไปสร้างคำตอบทางคลินิก
+   group/room ข้ามโดยไม่ตอบ; รูป/เสียง/ไฟล์ใน 1:1 ตอบข้อความไม่รองรับ
+   พร้อมเมนู ไม่โหลดไฟล์หรือใช้สร้างคำแนะนำทางคลินิก
 4. `domain/state.ts` อ่าน KV เพื่อตรวจ event ที่ตอบสำเร็จแล้วและหัวข้อล่าสุด
    ถ้าพบ event ซ้ำ หยุดโดยไม่ตอบซ้ำ; บริบทหมดอายุถือว่าไม่มีหัวข้อก่อนหน้า
 5. `domain/router.ts` ใช้ `routes.json` และ `aliases.json` เลือกผลลัพธ์:
@@ -123,15 +128,16 @@ Worker ส่วน `install-rich-menu.mjs` ใช้ตั้งเมนูค
 และ HMAC จะเก็บใน Cloudflare secrets; config มี binding `STATE_KV` และ Namespace ID
 ที่ผู้ใช้สร้างแล้ว แต่ยังต้องตรวจ Account และตั้ง secrets ก่อน deploy
 
-สถานะตอนนี้: Tickets 1–5 เสร็จแล้ว (schema, content, router, webhook/reply และ KV state)
-ทดสอบการรับ POST /webhook และสถานะได้ในเครื่องด้วย secret/KV จำลอง ยังไม่มี
-Flex styling หรือ Rich Menu และยังไม่ได้ deploy/test กับ LINE จริง
+สถานะตอนนี้: Tickets 1–6 ทำแล้ว (schema, content, router, webhook/reply, KV และ Flex)
+ผู้ใช้ยืนยันว่าบอตรุ่นก่อนหน้าตอบ LINE จริงแล้ว แต่การ์ดและปุ่มใหม่ใน Ticket 6
+ยังอยู่ในเครื่อง ไม่ได้ push/deploy; Rich Menu ยังเป็น Ticket 7
 
 ## เข้าใจสถานะและการทดสอบในตอนนี้
 
 ตอนนี้ทำตัวบอตจริงไปพร้อมกับ tests แล้ว ไม่ได้เขียนแต่ tests:
 มีคลังคำตอบจาก PDF, ตัวเลือก route, ตัวรับ webhook, ตัวตรวจ signature และ
-ตัวส่ง Reply API และระบบจำบริบท/กันซ้ำแล้ว เหลือการ์ด Flex, Rich Menu และติดตั้งจริง
+ตัวส่ง Reply API ระบบจำบริบท/กันซ้ำ และการ์ด Flex แล้ว เหลือ Rich Menu
+และทดสอบการ์ดใหม่บน LINE มือถือหลัง deploy
 
 การทดสอบในเครื่องส่ง event จำลองเข้าโค้ดจริง เช่นคำถาม “เลือดเข้าตา”
 พร้อมลายเซ็นที่สร้างด้วย secret ทดสอบ แล้วตรวจว่าโค้ดสร้าง HTTP request ไปยัง
@@ -146,23 +152,26 @@ Reply API ด้วยข้อความที่ตรง routes.json หร
 | Signature | เปลี่ยน body หลังเซ็น | ปฏิเสธ request โดยไม่ตอบ LINE |
 | Webhook/Reply | event จริงรูปแบบ LINE และจำลอง API 500 | ส่ง payload ถูกและจัดการความล้มเหลว |
 | KV state | ถาม “ผลบวก” ต่อหลัง “การเจาะเลือด”, event เดิมส่งซ้ำ | ใช้หัวข้อล่าสุด/หมดอายุ/ไม่ตอบ event ที่บันทึกแล้ว ใน KV จำลอง |
+| Flex/Navigation | ข้อความครบ 27 หัวข้อและปุ่มจริงใน payload | ไม่แก้ข้อความคลินิกและไปถึงทุกหัวข้อที่เปิดใช้ |
 | Typecheck | เรียกฟังก์ชันด้วยชนิดข้อมูลผิด | TypeScript ตรวจความเข้ากันได้ของโค้ด |
 | Build dry-run | รวมโค้ดเป็น Worker bundle | ประกอบไฟล์ได้ โดยยังไม่อัปโหลด Cloudflare |
 
-ผลล่าสุดคือ 116 test cases ใน 10 test files ผ่านทั้งหมด ไม่ใช่การทดลองแชทใน LINE
-116 ครั้ง และไม่รับประกันระบบ production ครบทุกด้าน ยังต้องทดสอบบน Cloudflare
+ผล Ticket 6 คือ 177 test cases ใน 12 test files ผ่านทั้งหมด ไม่ใช่การทดลองแชทใน LINE
+177 ครั้ง และไม่รับประกันระบบ production ครบทุกด้าน ยังต้องทดสอบบน Cloudflare
 จริงและ LINE มือถือ เช่นการแสดงการ์ด/ปุ่ม, KV, ความเร็ว/CPU, การหมดอายุบริบท
 และ Google Form ใน Ticket 8
 
-ขั้นถัดไปคือ Ticket 6: การ์ดคำตอบ Flex และปุ่มนำทางตามภาพ reference
-ส่วน namespace จริงและการทดสอบ LINE มือถือจะทำตอนติดตั้งใน Ticket 8
+ขั้นถัดไปสำหรับตรวจหน้าตาคือ deploy Ticket 6 แล้วทดสอบบน LINE มือถือ
+ส่วนงานพัฒนาถัดไปตามแผนคือ Ticket 7: Rich Menu และตัวติดตั้ง
+ดู [ผลตรวจคำตอบและข้อจำกัด](docs/content-review.md) ก่อนถือว่ารองรับครบทุกคำถาม
 
 อัปเดตการทดลอง deploy (10 ต.ค. 2569): ผู้ใช้เริ่ม Ticket 8 ก่อนงานหน้าตา
 และพบ webhook 502 ตอนส่ง Reply ขณะนี้มี diagnostic ชั่วคราวเฉพาะ error code/status
 เปิดด้วย `REPLY_DIAGNOSTICS=enabled`; ไม่เก็บข้อความ/ค่าลับ และยังคงปิด persistent logs
 รายละเอียดและวิธีตรวจอยู่ใน [บันทึก diagnosis](docs/reply-failure-diagnosis.md)
 พบ runtime defect แล้ว: native Workers fetch ปฏิเสธ `redirect:error` จึงเปลี่ยนเป็น
-`manual` และเพิ่ม runtime regression tests; ยังรอยืนยันการตอบบน LINE จริงหลัง deploy
+`manual` และเพิ่ม runtime regression tests; ผู้ใช้ยืนยันว่าตอบ LINE ได้แล้ว
+diagnostic ชั่วคราวยังอยู่ การเอาออกไม่รวมในงานหน้าตารอบนี้
 
 ## Local development
 
@@ -175,7 +184,7 @@ npm run typecheck
 npm run dev
 ```
 
-Current stage: Ticket 4 webhook and Reply API. Only POST /webhook is accepted;
+Current stage: Ticket 6 Flex replies and navigation (local verified, not deployed). Only POST /webhook is accepted;
 other paths return 404. PDF transcription, alias maps and UI
 copy are under content/. See docs/source-map.md for source pages and disabled
 ambiguous cases.
@@ -188,7 +197,7 @@ need explicit aliases.
 `npm run content:check` checks clinical schema, route IDs, versions, destination
 links and aliases. Test fixtures are not clinical content. Deployment runs
 content validation, type checks and tests first. Content snapshots record the
-visually checked transcription; renderer checks will be added in Ticket 6.
+visually checked transcription; renderer tests also read complete clinical text from Flex payloads.
 
 Keep LINE credentials out of Git. Original PDF/DOCX/JPG files remain local and
 are ignored. Add the actual KV namespace and generate binding types with
@@ -210,4 +219,4 @@ and replace only the outbound HTTP transport; they do not contact LINE.
 5. ปิดข้อความตอบอัตโนมัติ/ทักทายเดิมเมื่อบอตพร้อมรับหน้าที่ เพื่อไม่ให้ตอบซ้อน
 6. ติดตั้ง Rich Menu แล้วทดสอบบน LINE มือถือกับบัญชีผู้พัฒนา
 
-ยังไม่ต้องเปลี่ยน Webhook URL ตอนนี้ เพราะระบบอยู่ระหว่างพัฒนา
+Webhook URL /webhook เดิมใช้ต่อได้ ไม่ต้องสร้าง Worker หรือ KV ใหม่สำหรับ Ticket 6

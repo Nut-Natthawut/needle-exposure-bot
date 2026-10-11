@@ -132,3 +132,44 @@ followed. Full suite 116/116; typecheck/content:check/dry-run pass. Patched dev
 toolchain resolves sharp-related audit findings (zero remaining advisories).
 Await live deployment/chat confirmation before declaring the bot fixed and
 removing temporary diagnostic instrumentation. Source clinical content unchanged.
+
+2026-10-11: User confirms the previous version now replies in LINE. Temporary
+diagnostics remain; their removal is not included in the visual renderer task.
+
+Ticket 6: implemented and locally verified (2026-10-11), on the user's chosen
+existing folder/branch. Rechecked all 3 supplied PDF pages; no clinical text,
+numbers, sources, links, or enabled flags changed. Only presentation changed
+for 23 detailed routes; 4 short routes stay text, and 2 ambiguous routes stay
+disabled. Source snapshots were not updated. See content-review.md for limits.
+
+Added white/mint Flex cards, compact numbered markers, complete next/choice
+postbacks, partial warnings, six-topic home navigation, existing report warning
+followed by the exact Google Form URI and copyable URL, and contact-pending copy.
+Known UI aliases are exact allowlisted commands. Unknown text gets fallback/home;
+known image/file/audio 1:1 messages receive unsupported/home without file analysis.
+Only successful replies update event markers/context. No changes to signatures,
+secrets, storage architecture, billing, public PDF access, or medical recommendations.
+
+Rulings: preserve the schema's flex presentation (not a new steps type). Explicit
+spec excludes source footers in MVP; metadata remains internal. No mascot hosting
+endpoint, fabricated image URL, or Rich Menu installation. Quick Reply labels
+over 20 characters are omitted from shortcuts, not shortened; full labels remain
+on Flex buttons. Clarified the contradictory unsupported-event wording: unknown
+events stay ignored, but known 1:1 media receives the approved UI fallback.
+
+Evidence: initial renderer RED (44 missing-function failures), navigation RED
+(6 assertions), then integration consumers updated to read the new format rather
+than changing clinical expectations. Long Quick Reply qualifier test failed
+before removing truncation; media fallback failed 3 assertions before wiring UI;
+compact marker test failed before bounding marker height. Fresh full suite:
+177/177 in 12 files; typecheck and content:check pass. Native Workers tests inspect
+all 27 enabled routes plus UI commands using a fake external HTTP boundary.
+Dry-run bundles the final Worker without uploading: 62.20 KiB / gzip 10.43 KiB.
+
+Fresh independent reviewer accepted media fallback, rendered-action reachability,
+LINE box properties and unchanged corpus; no important findings remain.
+Local browser preview is approximate, not proof of LINE server validation or phone
+layout. Long Thai button labels and real Google Form access must still be tried
+on LINE mobile after deployment. No push/deploy or public release in this task.
+Next development ticket: 7 (Rich Menu). Live Ticket 6 phone verification belongs
+to the ongoing pilot/release gate in Ticket 8.

@@ -2,6 +2,10 @@ import {build} from 'esbuild';
 import {Miniflare, convertV4MiniflareOptions, Response as RuntimeResponse} from 'miniflare';
 import {expect, it} from 'vitest';
 import {createHmac} from 'node:crypto';
+import routes from '../content/routes.json';
+import ui from '../content/ui.json';
+import type {ReplyMessage} from '../src/line/reply';
+import {clinicalText} from './support/rendered-content';
 
 // Real reply implementation + native workerd fetch. Only the external API is fake.
 // Node fetch doubles cannot detect unsupported Workers RequestInit options.
@@ -63,5 +67,21 @@ it('signed real webhook replies successfully through the native Workers transpor
     expect(response.status).toBe(200);
     expect(await response.text()).toBe('OK');
     expect(destinations).toEqual(['https://api.line.me/v2/bot/message/reply']);
+  } finally {await runtime.dispose();}
+});
+it('native Worker delivers every enabled answer and UI command as complete LINE payloads',async()=>{
+  const bundle=await build({stdin:{contents:"import worker from './src/index'; export default worker;",resolveDir:process.cwd(),loader:'ts'},bundle:true,write:false,format:'esm',platform:'browser',target:'es2022'});
+  const payloads:{messages:ReplyMessage[]}[]=[];
+  const runtime=new Miniflare(convertV4MiniflareOptions({modules:true,script:bundle.outputFiles[0]!.text,compatibilityDate:'2026-10-03',compatibilityFlags:['nodejs_compat'],bindings:{LINE_CHANNEL_SECRET:'synthetic-secret',LINE_CHANNEL_ACCESS_TOKEN:'synthetic-access'},outboundService:async request=>{payloads.push(await request.json() as {messages:ReplyMessage[]}); return new RuntimeResponse('{}');}}));
+  try {
+    for(const value of [...routes.filter(r=>r.enabled).map(r=>r.routeId),'ui.home','ui.report','ui.contact','ui.opep','ui.reset']) {
+      const body=JSON.stringify({events:[{type:'postback',webhookEventId:`synthetic-${value}`,replyToken:'synthetic-reply',source:{type:'user',userId:'synthetic-user'},postback:{data:value}}]});
+      const response=await runtime.dispatchFetch('https://test.invalid/webhook',{method:'POST',body,headers:{'x-line-signature':createHmac('sha256','synthetic-secret').update(body).digest('base64')}});
+      expect(response.status,value).toBe(200);
+      const route=routes.find(r=>r.routeId===value);
+      if(route) expect(clinicalText(payloads.at(-1)!.messages[0]!),value).toBe(route.text);
+      else expect(JSON.stringify(payloads.at(-1))).not.toContain(ui.fallback);
+    }
+    expect(payloads).toHaveLength(32);
   } finally {await runtime.dispose();}
 });

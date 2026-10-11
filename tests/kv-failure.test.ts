@@ -5,11 +5,13 @@ import { createState } from '../src/domain/state';
 import { MemoryKV } from './support/memory-kv';
 import ui from '../content/ui.json';
 import routes from '../content/routes.json';
+import type {ReplyMessage} from '../src/line/reply';
+import {clinicalText} from './support/rendered-content';
 
 function setup() {
   const kv = new MemoryKV();
   const env = {LINE_CHANNEL_SECRET:'test-channel', LINE_CHANNEL_ACCESS_TOKEN:'test-access', HMAC_SECRET:'test-hmac', STATE_KV:kv};
-  const sent: {messages: {text:string}[]}[] = [];
+  const sent: {messages: ReplyMessage[]}[] = [];
   let now = 1000;
   let replyStatus = 200;
   const handle = createWebhookHandler(async (_url, init) => {sent.push(JSON.parse(String(init.body))); return new Response('{}', {status:replyStatus});}, () => now);
@@ -25,9 +27,9 @@ function setup() {
 it('remembers the latest route for a follow-up then expires after 30 minutes', async () => {
   const x = setup();
   await x.send('การเจาะเลือด','one'); await x.send('ผลบวก','two');
-  expect(x.sent[1]?.messages[0]?.text).toBe(routes.find(r => r.routeId === 'lab.source.positive')?.text);
+  expect(clinicalText(x.sent[1]?.messages[0]!)).toBe(routes.find(r => r.routeId === 'lab.source.positive')?.text);
   x.setNow(1801000); await x.send('ในเวลา','three');
-  expect(x.sent[2]?.messages[0]?.text).toBe(ui.missingContext);
+  expect(clinicalText(x.sent[2]?.messages[0]!)).toBe(ui.missingContext);
 });
 it('does not reply again to an already successful event', async () => {
   const x = setup(); await x.send('เลือดเข้าตา','same'); await x.send('เลือดเข้าตา','same');
@@ -42,27 +44,27 @@ it('does not mark an event successful when Reply API fails', async () => {
 });
 it('updates topic after a new postback and resets explicitly', async () => {
   const x = setup(); await x.send('การเจาะเลือด','one'); await x.send('first_aid.root','two','postback'); await x.send('เข้าตา','three');
-  expect(x.sent[2]?.messages[0]?.text).toBe(routes.find(r => r.routeId === 'first_aid.eye')?.text);
+  expect(clinicalText(x.sent[2]?.messages[0]!)).toBe(routes.find(r => r.routeId === 'first_aid.eye')?.text);
   await x.send('เริ่มใหม่','four'); await x.send('เข้าตา','five');
-  expect(x.sent[3]?.messages[0]?.text).toBe(ui.reset);
-  expect(x.sent[4]?.messages[0]?.text).toBe(ui.missingContext);
+  expect(clinicalText(x.sent[3]?.messages[0]!)).toBe(ui.reset);
+  expect(clinicalText(x.sent[4]?.messages[0]!)).toBe(ui.missingContext);
 });
 it('clears old topic after an ambiguous new question', async () => {
   const x = setup(); await x.send('การเจาะเลือด','one'); await x.send('PEP','two'); await x.send('ผลบวก','three');
-  expect(x.sent[2]?.messages[0]?.text).toBe(ui.missingContext);
+  expect(clinicalText(x.sent[2]?.messages[0]!)).toBe(ui.missingContext);
 });
 it('direct routes still reply when KV reads and writes fail', async () => {
   const x = setup(); x.kv.failRead=x.kv.failWrite=x.kv.failDelete=true;
   expect((await x.send('first_aid.eye','one','postback')).status).toBe(200);
-  expect(x.sent[0]?.messages[0]?.text).toBe(routes.find(r => r.routeId === 'first_aid.eye')?.text);
+  expect(clinicalText(x.sent[0]?.messages[0]!)).toBe(routes.find(r => r.routeId === 'first_aid.eye')?.text);
   expect((await x.send('ผลบวก','two')).status).toBe(200);
-  expect(x.sent[1]?.messages[0]?.text).toBe(ui.missingContext);
+  expect(clinicalText(x.sent[1]?.messages[0]!)).toBe(ui.missingContext);
 });
 it('KV rate-limit on a topic change does not block reply or retain old readable context', async () => {
   const x = setup(); await x.send('การเจาะเลือด','one'); x.kv.failContextWrite=true;
   expect((await x.send('first_aid.root','two','postback')).status).toBe(200);
   await x.send('ผลบวก','three');
-  expect(x.sent[2]?.messages[0]?.text).toBe(ui.missingContext);
+  expect(clinicalText(x.sent[2]?.messages[0]!)).toBe(ui.missingContext);
 });
 it('markReplied failure never turns a delivered reply into a webhook error', async () => {
   const x = setup(); x.kv.failWrite=true;
@@ -90,5 +92,5 @@ it('handles duplicate events and follow-ups within one signed batch despite stal
   const handle = createWebhookHandler(async (_url, init) => {x.sent.push(JSON.parse(String(init.body))); return new Response('{}');}, () => 1000);
   expect((await handle(new Request('https://test.invalid/webhook', {method:'POST',headers:{'x-line-signature':signature},body}), x.env)).status).toBe(200);
   expect(x.sent).toHaveLength(2);
-  expect(x.sent[1]?.messages[0]?.text).toBe(routes.find(r => r.routeId === 'lab.source.positive')?.text);
+  expect(clinicalText(x.sent[1]?.messages[0]!)).toBe(routes.find(r => r.routeId === 'lab.source.positive')?.text);
 });

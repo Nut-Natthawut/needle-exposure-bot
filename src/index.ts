@@ -1,11 +1,10 @@
 import routes from '../content/routes.json';
 import aliases from '../content/aliases.json';
-import ui from '../content/ui.json';
 import { resolveAction } from './domain/router';
 import { reply, type Fetcher } from './line/reply';
 import { verifyLineSignature } from './line/signature';
 import { isRecord, parseEvent } from './line/events';
-import { renderText } from './line/render';
+import { renderResolution, renderUi, resolveUiCommand } from './line/render';
 import { createState, type StateKV } from './domain/state';
 
 type RuntimeEnv = Pick<Env, 'LINE_CHANNEL_SECRET' | 'LINE_CHANNEL_ACCESS_TOKEN'> & {
@@ -57,12 +56,10 @@ export function createWebhookHandler(fetcher: Fetcher = fetch, now = Date.now) {
       const event = parseEvent(rawEvent);
       if (!event) continue;
       if (await state.hasReplied(event.eventId)) continue;
-      const reset = event.action.kind === 'text' ? event.action.value.trim() === 'เริ่มใหม่'
-        : event.action.kind === 'postback' && event.action.value === 'ui.reset';
-      const resolution = event.action.kind === 'follow' || reset ? null
-        : resolveAction({...event.action, lastRouteId:await state.getLastRouteId(event.userId) ?? undefined}, routes, aliases);
-      const messages = event.action.kind === 'follow' ? [{type:'text' as const, text:ui.welcome}]
-        : reset ? [{type:'text' as const, text:ui.reset}] : renderText(resolution!);
+      const command = event.action.kind === 'follow' ? 'home' : event.action.kind === 'unsupported' ? 'unsupported' : resolveUiCommand(event.action);
+      const resolution = command === 'opep' ? resolveAction({kind:'text',value:'PEP'},routes,aliases)
+        : command || event.action.kind === 'follow' || event.action.kind === 'unsupported' ? null : resolveAction({...event.action, lastRouteId:await state.getLastRouteId(event.userId) ?? undefined}, routes, aliases);
+      const messages = command && command !== 'opep' ? renderUi(command) : renderResolution(resolution!);
       const result = await reply(event.replyToken, messages, env.LINE_CHANNEL_ACCESS_TOKEN, fetcher);
       if (!result.ok) {
         // Temporary live probe: never log body, identifiers, credentials or exceptions.

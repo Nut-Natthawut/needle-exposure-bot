@@ -150,17 +150,21 @@
 
 ### Ticket 6: รูปแบบคำตอบและการนำทาง (1 วัน)
 
+สถานะ: ทำและตรวจในเครื่อง 11 ตุลาคม 2569 — ข้อความเดิมครบ 27 routes,
+review ผ่าน; การ์ดใหม่ยังไม่ push/deploy และต้องตรวจบน LINE มือถือจริง
+รายละเอียดข้อวินิจฉัยและผลทดสอบอยู่ใน docs/implementation-progress.md
+
 **Depends on:** Ticket 5
 
 **Files:** Create src/line/render.ts, tests/render.test.ts; Modify src/index.ts
 
 **Interfaces:** renderRoute(route, uiCopy) → LINE message array; renderChoices(ids, routes) → LINE message array; renderer ห้ามแต่งข้อความคลินิกใหม่
 
-- [ ] เขียน failing tests ว่า route แบบ text ใช้ text จาก JSON ตรงตัว, route แบบ steps ใช้ Flex ที่อ่านข้อความเดิม, next routes กลายเป็น Quick Reply/postback, route กำกวมมีตัวเลือก และ report action แสดงคำเตือนก่อนปุ่ม URI ที่ชี้ Google Form จริงพร้อม URL ที่คัดลอกได้
-- [ ] รัน npm test -- tests/render.test.ts ให้ล้มเพราะ renderer ยังไม่มี
-- [ ] เขียน renderer ที่อ่านเฉพาะ routes.json/ui.json; Flex เปลี่ยนรูปแบบการแสดงได้แต่ไม่ย่อหรือแปลความ clinical text; ข้อความยาวแยกตาม route ที่ผู้ใช้เลือก ไม่รวมทุก branch
-- [ ] เขียน fallback สำหรับ unknown text, unsupported message, missing context และ contact pending จาก ui.json เท่านั้น
-- [ ] รัน npm test -- tests/render.test.ts tests/content-snapshot.test.ts และ npm run typecheck ให้ผ่าน; commit renderer
+- [x] เขียน failing tests ว่า route แบบ text ใช้ text จาก JSON ตรงตัว, route แบบ steps ใช้ Flex ที่อ่านข้อความเดิม, next routes กลายเป็น Quick Reply/postback, route กำกวมมีตัวเลือก และ report action แสดงคำเตือนก่อนปุ่ม URI ที่ชี้ Google Form จริงพร้อม URL ที่คัดลอกได้
+- [x] รัน npm test -- tests/render.test.ts ให้ล้มเพราะ renderer ยังไม่มี
+- [x] เขียน renderer ที่อ่านเฉพาะ routes.json/ui.json; Flex เปลี่ยนรูปแบบการแสดงได้แต่ไม่ย่อหรือแปลความ clinical text; ข้อความยาวแยกตาม route ที่ผู้ใช้เลือก ไม่รวมทุก branch
+- [x] เขียน fallback สำหรับ unknown text, unsupported message, missing context และ contact pending จาก ui.json เท่านั้น
+- [x] รัน npm test -- tests/render.test.ts tests/content-snapshot.test.ts และ npm run typecheck ให้ผ่าน; commit renderer
 
 **Done when:** กดทางเลือกแล้วได้ postback routeId จริง, คำตอบคลินิกตรง JSON ทุกตัวอักษร และปุ่มรายงานเตือนก่อนเปิดฟอร์ม
 
