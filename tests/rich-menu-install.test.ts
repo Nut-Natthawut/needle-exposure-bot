@@ -27,7 +27,11 @@ describe('one-time rich menu installer',()=>{
     }
     const create=fetcher.mock.calls[1]![1];
     expect(JSON.parse(create.body)).toEqual({...config,name:menuVersion(config,image)});
-    expect(fetcher.mock.calls[2]![1]).toMatchObject({method:'POST',headers:{'Content-Type':'image/png'},body:image});
+    const upload=fetcher.mock.calls[2]![1];
+    expect(upload).toMatchObject({method:'POST',headers:{'Content-Type':'image/png'}});
+    // Compare all PNG bytes without recursively matching nearly 1MB as an object.
+    expect(Buffer.isBuffer(upload.body)).toBe(true);
+    expect((upload.body as Buffer).equals(image)).toBe(true);
     expect(fetcher.mock.calls[3]![1].method).toBe('POST');
   });
   it('reuses an identical menu and does not upload an immutable image twice',async()=>{
@@ -40,7 +44,10 @@ describe('one-time rich menu installer',()=>{
     const fetcher=vi.fn().mockResolvedValueOnce(json({richmenus:[{...config,name:menuVersion(config,image),richMenuId:id}]}))
       .mockResolvedValueOnce(json({},404)).mockResolvedValueOnce(json({})).mockResolvedValueOnce(json({})).mockResolvedValueOnce(json({richMenuId:id}));
     await installRichMenu({config,image,accessToken:token,fetcher});
-    expect(fetcher.mock.calls[2]![1]).toMatchObject({method:'POST',body:image});
+    const upload=fetcher.mock.calls[2]![1];
+    expect(upload).toMatchObject({method:'POST'});
+    expect(Buffer.isBuffer(upload.body)).toBe(true);
+    expect((upload.body as Buffer).equals(image)).toBe(true);
   });
   it.each([302,400,401,403,429,500])('stops on upload HTTP %i; never activates or exposes server body/token',async(status)=>{
     const fetcher=vi.fn().mockResolvedValueOnce(json({richmenus:[]})).mockResolvedValueOnce(json({richMenuId:id}))
