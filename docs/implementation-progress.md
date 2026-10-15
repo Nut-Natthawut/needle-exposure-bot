@@ -173,3 +173,56 @@ layout. Long Thai button labels and real Google Form access must still be tried
 on LINE mobile after deployment. No push/deploy or public release in this task.
 Next development ticket: 7 (Rich Menu). Live Ticket 6 phone verification belongs
 to the ongoing pilot/release gate in Ticket 8.
+
+Ticket 7: files implemented and locally verified (2026-10-11); live installation
+and phone verification are pending the owner's manual step. Generated the real
+mint/white six-topic artwork with built-in imagegen using the approved visual
+and male-nurse references. Final PNG is 2500x1686, 975654 bytes. Actual banner
+ends at y450, rows split at1065, columns at833/1667. These coordinates supersede
+the requested 350px banner after visual inspection, and are pinned in tests.
+Added postback config and manual-only environment-token installer; no new
+Worker code, medical content, secrets, storage or paid resource.
+
+Installer lists hash-versioned menus, creates if needed, uploads or verifies
+the immutable PNG, sets default only after image success, and reads back default.
+Retrying manually reuses the same version or resumes a missing image; no automatic
+retries, per-user linking, deletion, or per-webhook menu creation. Redirects
+are not followed, requests have 15-second timeouts, errors omit API bodies/keys.
+The first/knowledge accessibility labels are meaningful short labels <=20 chars;
+full titles stay on the artwork. Report remains a warning-first postback.
+
+Evidence: missing config/installer RED observed before implementation; fresh
+suite 206/206 across14 files, typecheck/content:check/rich-menu:check/diff whitespace
+check pass. Six actual postbacks exercised through signed webhook; external
+LINE API is mocked for install/reuse/resume/HTTP failures and read-back verification.
+No credentials were present in .env/.dev.vars. No live LINE API request, install,
+commit, push or deploy was performed in this task. Owner chose manual instructions,
+so no additional setup wizard was authored. See rich-menu.md for hidden-token
+entry in a temporary subshell and mobile checks. A successful local preflight
+does not mean the menu is installed; Ticket8/live pilot gates remain open.
+Fresh read-only reviewer found no Critical/Important/Minor findings, verified
+PNG decode/coordinates and official immutable upload/reuse behavior. Declined
+live channel/token/install/phone checks and unchanged clinical/form questions;
+accepted as explicit owner/pilot gates, not evidence of live readiness.
+
+2026-10-16: Owner approved visual-only polish of existing Flex replies in the
+same folder/branch: white/deep-green/mint, consistent cards/buttons, comfortable
+wrapped-line spacing, and a distinct report-warning panel. Clinical/UI wording,
+actions, order, route logic and URLs must not change. Contact alignment is
+explicitly deferred pending the client. Existing Rich Menu artwork/config and
+the owner's manual OA Manager D/F links are untouched.
+
+Added 4 real-renderer visual contract tests; all 4 failed before the production
+change (missing report panel, dark header, line spacing, home-link hierarchy).
+After the minimal style change, 52 scoped tests passed. Full fresh suite:
+210/210 across 15 files; typecheck, content:check and diff whitespace check pass.
+The report uses the same warning panel as partial notices; body/action text is
+unchanged, no source snapshots were updated. Flattened visible text, action
+payloads, Quick Replies and their order over all 29 routes, UI commands,
+choices and fallbacks have identical before/after SHA256:
+02fc1e976e48fe79be3033d96132ecef33a10fb065b6df0a36cff979f5d07eaa.
+Clinical corpus, UI, aliases, metadata and both menu images/config also retain
+their pre-edit hashes. See line-response-style.md for the visual-only scope.
+No commit/push/deploy, secret change, live LINE message or menu installation.
+Phone rendering, dark-mode behavior and larger system fonts remain manual
+acceptance gates; local payload/contrast checks do not prove actual LINE layout.

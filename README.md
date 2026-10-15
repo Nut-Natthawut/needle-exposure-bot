@@ -27,12 +27,14 @@ LINE OA bot: TypeScript + Cloudflare Workers, deterministic JSON routes.
 │   └── schema.json                 [ทำแล้ว] สัญญารูปแบบ clinical route
 ├── scripts/                        เครื่องมือพัฒนาและตั้งค่าครั้งเดียว
 │   ├── validate-content.mjs        [ทำแล้ว] ตรวจข้อมูลก่อน deploy
-│   └── install-rich-menu.mjs       [รอทำ] สร้าง/อัปโหลด/ตั้ง default Rich Menu
+│   ├── install-rich-menu.mjs       [ทำแล้ว] เครื่องมือติดตั้ง Rich Menu ด้วย token ในเครื่อง
+│   └── install-rich-menu.d.mts     [ทำแล้ว] types ของเครื่องมือติดตั้ง
 ├── assets/
 │   ├── branding/                   [ทำแล้ว] รูปโปรไฟล์และมาสคอต
-│   └── rich-menu.png               [รอทำ] ภาพเมนู 6 ช่อง
+│   ├── rich-menu.png               [ทำแล้ว] ภาพเมนูสำหรับพิกัด API แบบมีแถบหัว
+│   └── rich-menu-oa-manager.png    [ทำแล้ว] ภาพเทมเพลต OA Manager 6 ช่องเท่ากัน
 ├── config/
-│   └── rich-menu.json              [รอทำ] พิกัดพื้นที่กดและ postback ของเมนู
+│   └── rich-menu.json              [ทำแล้ว] พิกัดพื้นที่กดและ postback ของเมนู
 ├── tests/
 │   ├── content-schema.test.ts      [ทำแล้ว] ข้อมูลครบและรูปแบบถูก
 │   ├── content-corpus.test.ts      [ทำแล้ว] route/alias/ปลายทาง/เวอร์ชันถูก
@@ -45,16 +47,21 @@ LINE OA bot: TypeScript + Cloudflare Workers, deterministic JSON routes.
 │   ├── state.test.ts               [ทำแล้ว] TTL/HMAC/ล้างบริบท/event กันซ้ำ
 │   ├── kv-failure.test.ts          [ทำแล้ว] ถามต่อ/กันซ้ำ/KV ล้มเหลวผ่าน webhook
 │   ├── render.test.ts              [ทำแล้ว] การ์ด/ข้อความครบ/คำเตือน/ข้อจำกัด LINE
+│   ├── visual-style.test.ts        [ทำแล้ว] ความชัดหัวการ์ด/กล่องเตือน/ระยะบรรทัด/ปุ่มกลับ
 │   ├── navigation.test.ts          [ทำแล้ว] เมนู/ถามต่อ/เปลี่ยนหัวข้อ/ทุกปุ่มไปถึงคำตอบ
+│   ├── rich-menu.test.ts           [ทำแล้ว] ภาพ/พิกัด/6 postbacks เข้า webhook จริง
+│   ├── rich-menu-install.test.ts   [ทำแล้ว] create/upload/default/reuse/failure แบบจำลอง API
 │   ├── support/memory-kv.ts        [ทำแล้ว] KV จำลองสำหรับ tests ไม่ใช่ฐานข้อมูลจริง
 │   ├── support/rendered-content.ts [ทำแล้ว] อ่านข้อความจาก payload เพื่อเทียบต้นฉบับ
 │   ├── __snapshots__/              [ทำแล้ว] baseline ของข้อความ
-│   └── *.test.ts                   [รอทำเพิ่ม] Rich Menu/release integration
+│   └── *.test.ts                   [รอทำเพิ่ม] release integration
 ├── docs/
 │   ├── source-map.md               [ทำแล้ว] แต่ละกรณีอ้าง PDF หน้าไหน/เหตุผลที่ปิด
 │   ├── implementation-progress.md  [ทำแล้ว] ผลตรวจและการตัดสินใจระหว่างพัฒนา
 │   ├── line-response-style.md      [ทำแล้ว] รูปแบบคำตอบตามภาพ reference
 │   ├── content-review.md           [ทำแล้ว] ผลตรวจคำตอบ/ข้อจำกัด/รายการลองบนมือถือ
+│   ├── rich-menu.md                [ทำแล้ว] วิธีติดตั้งเองโดยไม่บันทึก key ลงไฟล์
+│   ├── rich-menu-image-prompt.md   [ทำแล้ว] prompt/reference และพิกัดภาพสุดท้าย
 │   ├── release-checklist.md        [รอทำ] ตรวจ LINE จริง/deploy/rollback
 │   └── superpowers/                [ทำแล้ว] specs/ และ plans/ ที่ใช้ดำเนินงาน
 ├── package.json                    [ทำแล้ว] dependencies และคำสั่งพัฒนา
@@ -128,16 +135,19 @@ Worker ส่วน `install-rich-menu.mjs` ใช้ตั้งเมนูค
 และ HMAC จะเก็บใน Cloudflare secrets; config มี binding `STATE_KV` และ Namespace ID
 ที่ผู้ใช้สร้างแล้ว แต่ยังต้องตรวจ Account และตั้ง secrets ก่อน deploy
 
-สถานะตอนนี้: Tickets 1–6 ทำแล้ว (schema, content, router, webhook/reply, KV และ Flex)
-ผู้ใช้ยืนยันว่าบอตรุ่นก่อนหน้าตอบ LINE จริงแล้ว แต่การ์ดและปุ่มใหม่ใน Ticket 6
-ยังอยู่ในเครื่อง ไม่ได้ push/deploy; Rich Menu ยังเป็น Ticket 7
+สถานะตอนนี้: Tickets 1–7 มีโค้ดแล้ว (รวม Flex และไฟล์ Rich Menu)
+ผู้ใช้เลือกตั้ง Rich Menu ด้วย OA Manager และมีภาพสำหรับเทมเพลต 6 ช่องแล้ว
+ตัวติดตั้งผ่าน API เป็นทางเลือกเท่านั้น ห้ามรันไปทับค่าที่ตั้งเองโดยไม่ตั้งใจ
+ชุดปรับหน้าตา 16 ต.ค. 2569 เปลี่ยนเฉพาะ layout/สี/ระยะบรรทัด ไม่เปลี่ยนข้อมูล
+การตรวจการ์ดใหม่บน LINE มือถือหลัง deployment ยังรอยืนยัน
+ดูวิธี OA Manager และทางเลือก API ใน [ขั้นตอนติดตั้ง](docs/rich-menu.md)
 
 ## เข้าใจสถานะและการทดสอบในตอนนี้
 
 ตอนนี้ทำตัวบอตจริงไปพร้อมกับ tests แล้ว ไม่ได้เขียนแต่ tests:
 มีคลังคำตอบจาก PDF, ตัวเลือก route, ตัวรับ webhook, ตัวตรวจ signature และ
-ตัวส่ง Reply API ระบบจำบริบท/กันซ้ำ และการ์ด Flex แล้ว เหลือ Rich Menu
-และทดสอบการ์ดใหม่บน LINE มือถือหลัง deploy
+ตัวส่ง Reply API ระบบจำบริบท/กันซ้ำ การ์ด Flex และไฟล์ Rich Menu แล้ว
+เหลือติดตั้ง Rich Menu และทดสอบการ์ด/ปุ่มจริงบน LINE มือถือ
 
 การทดสอบในเครื่องส่ง event จำลองเข้าโค้ดจริง เช่นคำถาม “เลือดเข้าตา”
 พร้อมลายเซ็นที่สร้างด้วย secret ทดสอบ แล้วตรวจว่าโค้ดสร้าง HTTP request ไปยัง
@@ -162,7 +172,9 @@ Reply API ด้วยข้อความที่ตรง routes.json หร
 และ Google Form ใน Ticket 8
 
 ขั้นถัดไปสำหรับตรวจหน้าตาคือ deploy Ticket 6 แล้วทดสอบบน LINE มือถือ
-ส่วนงานพัฒนาถัดไปตามแผนคือ Ticket 7: Rich Menu และตัวติดตั้ง
+Rich Menu มีไฟล์แล้ว ผู้ใช้เลือกอัปโหลดและตั้ง action เองใน OA Manager
+`npm run rich-menu:check` ตรวจทางเลือก API ในเครื่อง ไม่ตรวจค่าที่ตั้งใน OA Manager
+การ push/deploy Worker ไม่ได้อัปโหลดภาพหรือเปลี่ยน Rich Menu ให้โดยอัตโนมัติ
 ดู [ผลตรวจคำตอบและข้อจำกัด](docs/content-review.md) ก่อนถือว่ารองรับครบทุกคำถาม
 
 อัปเดตการทดลอง deploy (10 ต.ค. 2569): ผู้ใช้เริ่ม Ticket 8 ก่อนงานหน้าตา
@@ -184,7 +196,7 @@ npm run typecheck
 npm run dev
 ```
 
-Current stage: Ticket 6 Flex replies and navigation (local verified, not deployed). Only POST /webhook is accepted;
+Current stage: visual-only Flex polish and owner-configured OA Manager Rich Menu; mobile acceptance pending. Only POST /webhook is accepted;
 other paths return 404. PDF transcription, alias maps and UI
 copy are under content/. See docs/source-map.md for source pages and disabled
 ambiguous cases.

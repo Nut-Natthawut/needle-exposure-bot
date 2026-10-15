@@ -2,7 +2,7 @@ export type Fetcher = (url: string, init: RequestInit) => Promise<Response>;
 export type QuickReplyItem = {type:'action'; action:{type:'postback'; label:string; data:string}};
 export type TextMessage = { type: 'text'; text: string; quickReply?: {items: QuickReplyItem[]} };
 export type FlexAction = {type:'postback'; label:string; data:string} | {type:'uri'; label:string; uri:string};
-export type FlexText = {type:'text'; text:string; wrap:true; size?:string; color?:string; weight?:'bold'; flex?:number; align?:'center'; margin?:string};
+export type FlexText = {type:'text'; text:string; wrap:true; size?:string; color?:string; weight?:'bold'; flex?:number; align?:'center'; margin?:string; lineSpacing?:string};
 export type FlexBox = {type:'box'; layout:'vertical'|'horizontal'; contents:FlexComponent[]; spacing?:string; paddingAll?:string; backgroundColor?:string; cornerRadius?:string; width?:string; height?:string; justifyContent?:'center'; flex?:number; margin?:string};
 export type FlexButton = {type:'button'; action:FlexAction; style:'primary'|'secondary'|'link'; height:'md'; color?:string; margin?:string};
 export type FlexComponent = FlexText | FlexBox | FlexButton | {type:'separator'; margin?:string; color?:string};

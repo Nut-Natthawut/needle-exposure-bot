@@ -5,13 +5,13 @@ import type { ReplyMessage, FlexMessage, FlexComponent, FlexAction, FlexBox, Qui
 
 type Link = {routeId:string; label:string};
 export type UiCommand = 'home'|'reset'|'report'|'contact'|'opep'|'unsupported';
-const colors = {ink:'#173D43', muted:'#46656A', teal:'#007F79', mint:'#E7F5F2', white:'#FFFFFF', warning:'#FFF1F0', warningInk:'#9C3039'};
+const colors = {ink:'#173D43', muted:'#46656A', teal:'#007F79', heading:'#0B4F4A', mint:'#E7F5F2', surface:'#F5FAF8', white:'#FFFFFF', warning:'#FFF1F0', warningInk:'#9C3039'};
 
 function text(value:string, color = colors.ink): FlexComponent {
-  return {type:'text', text:value, wrap:true, size:'md', color};
+  return {type:'text', text:value, wrap:true, size:'md', lineSpacing:'6px', color};
 }
-function actionButton(action:FlexAction, primary = false): FlexComponent {
-  return {type:'button', action, height:'md', style:primary ? 'primary':'secondary', ...(primary ? {color:colors.teal} : {}), margin:'sm'};
+function actionButton(action:FlexAction, style:'primary'|'secondary'|'link' = 'secondary'): FlexComponent {
+  return {type:'button', action, height:'md', style, color:style === 'secondary' ? colors.mint : colors.teal, margin:'sm'};
 }
 function postbacks(links:readonly Link[]): FlexComponent[] {
   return links.map(link => actionButton({type:'postback',label:link.label,data:link.routeId}));
@@ -23,27 +23,30 @@ function contentBlock(value:string): FlexBox {
     const numbered = /^(\d+\.\s)(.+)$/u.exec(line);
     if (!numbered) return text(line);
     return {type:'box',layout:'horizontal',spacing:'md',contents:[
-      {type:'box',layout:'vertical',width:'36px',height:'36px',justifyContent:'center',flex:0,paddingAll:'4px',backgroundColor:colors.teal,cornerRadius:'18px',contents:[{type:'text',text:numbered[1]!,wrap:true,color:colors.white,size:'md',weight:'bold',align:'center'}]},
-      {type:'text',text:numbered[2]!,wrap:true,color:colors.ink,size:'md',flex:1},
+      {type:'box',layout:'vertical',width:'36px',height:'36px',justifyContent:'center',flex:0,paddingAll:'4px',backgroundColor:colors.teal,cornerRadius:'18px',contents:[{type:'text',text:numbered[1]!,wrap:true,lineSpacing:'6px',color:colors.white,size:'md',weight:'bold',align:'center'}]},
+      {type:'text',text:numbered[2]!,wrap:true,lineSpacing:'6px',color:colors.ink,size:'md',flex:1},
     ]};
   })};
 }
-function card(title:string, value:string, actions:FlexComponent[], partial = false): FlexMessage {
+function warningBlock(value:string): FlexBox {
+  return {type:'box',layout:'vertical',backgroundColor:colors.warning,cornerRadius:'12px',paddingAll:'16px',contents:[text(value,colors.warningInk)]};
+}
+function card(title:string, value:string, actions:FlexComponent[], options:{partial?:boolean; bodyTone?:'warning'} = {}): FlexMessage {
   const contents:FlexComponent[] = [
-    {type:'box',layout:'vertical',backgroundColor:colors.mint,cornerRadius:'12px',paddingAll:'16px',contents:[{type:'text',text:title,wrap:true,size:'lg',weight:'bold',color:colors.ink}]},
-    contentBlock(value),
+    {type:'box',layout:'vertical',backgroundColor:colors.heading,cornerRadius:'12px',paddingAll:'16px',contents:[{type:'text',text:title,wrap:true,lineSpacing:'6px',size:'lg',weight:'bold',color:colors.white}]},
+    options.bodyTone === 'warning' ? warningBlock(value) : contentBlock(value),
   ];
-  if (partial) contents.push({type:'box',layout:'vertical',backgroundColor:colors.warning,cornerRadius:'12px',paddingAll:'12px',contents:[text(ui.partialContent,colors.warningInk)]});
+  if (options.partial) contents.push(warningBlock(ui.partialContent));
   return {type:'flex',altText:title,contents:{type:'bubble',size:'mega',
-    body:{type:'box',layout:'vertical',contents,spacing:'lg',paddingAll:'20px',backgroundColor:colors.white},
-    footer:{type:'box',layout:'vertical',spacing:'sm',paddingAll:'16px',backgroundColor:colors.white,contents:actions},
+    body:{type:'box',layout:'vertical',contents,spacing:'xl',paddingAll:'20px',backgroundColor:colors.white},
+    footer:{type:'box',layout:'vertical',spacing:'sm',paddingAll:'16px',backgroundColor:colors.surface,contents:actions},
   }};
 }
 function homeCard(): FlexMessage {
   return card(ui.homeTitle,ui.homeHelp,postbacks(ui.mainMenu));
 }
 function homeButton(): FlexComponent {
-  return actionButton({type:'postback',label:ui.homeLabel,data:'ui.home'});
+  return actionButton({type:'postback',label:ui.homeLabel,data:'ui.home'},'link');
 }
 function quickReply(links:readonly Link[]): {items:QuickReplyItem[]} {
   // Quick Reply permits 20 characters. Longer labels remain intact on the
@@ -59,7 +62,7 @@ export function resolveUiCommand(input:ActionInput): UiCommand|null {
   return allowed.find(item=>item === command) ?? null;
 }
 export function renderUi(command:Exclude<UiCommand,'opep'>): ReplyMessage[] {
-  if (command === 'report') return [card(ui.reportTitle,ui.reportWarning,[actionButton({type:'uri',label:ui.reportLabel,uri:ui.reportUrl},true),homeButton()]),{type:'text',text:ui.reportUrl}];
+  if (command === 'report') return [card(ui.reportTitle,ui.reportWarning,[actionButton({type:'uri',label:ui.reportLabel,uri:ui.reportUrl},'primary'),homeButton()],{bodyTone:'warning'}),{type:'text',text:ui.reportUrl}];
   const value = command === 'home' ? ui.welcome : command === 'reset' ? ui.reset : command === 'unsupported' ? ui.unsupported : ui.contactPending;
   return [{type:'text',text:value},homeCard()];
 }
@@ -74,7 +77,7 @@ export function renderRoute(route:Route): ReplyMessage[] {
     const actions:FlexComponent[] = [];
     if (links.length) actions.push({type:'text',text:ui.nextTitle,wrap:true,size:'sm',color:colors.muted});
     actions.push(...postbacks(links),homeButton());
-    const message = card(title,route.text,actions,partial);
+    const message = card(title,route.text,actions,{partial});
     message.quickReply = quickReply([...links,{routeId:'ui.home',label:ui.homeLabel}]);
     return [message];
   }

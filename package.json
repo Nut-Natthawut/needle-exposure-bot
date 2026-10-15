@@ -12,6 +12,8 @@
     "test": "vitest run",
     "typecheck": "tsc --noEmit",
     "content:check": "node scripts/validate-content.mjs",
+    "rich-menu:check": "node scripts/install-rich-menu.mjs --check",
+    "rich-menu:install": "node scripts/install-rich-menu.mjs --install",
     "deploy": "npm run content:check && npm run typecheck && npm test && wrangler deploy"
   },
   "dependencies": {
