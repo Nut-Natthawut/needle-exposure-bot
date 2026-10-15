@@ -6,22 +6,82 @@
     "โดนเข็ม": [
       "first_aid.root"
     ],
+    "โดนเข็มตำ": [
+      "first_aid.root"
+    ],
+    "ปฐมพยาบาล": [
+      "first_aid.root"
+    ],
+    "โดนเข็มต้องทำยังไง": [
+      "first_aid.root"
+    ],
+    "โดนเข็มทำไง": [
+      "first_aid.root"
+    ],
+    "เข็มตำทำไง": [
+      "first_aid.root"
+    ],
+    "เข็มทิ่มตำต้องทำอย่างไร": [
+      "first_aid.root"
+    ],
+    "ถูกเข็มตำ": [
+      "first_aid.root"
+    ],
+    "เข็มตำ": [
+      "first_aid.root"
+    ],
+    "เข็มทิ่ม": [
+      "first_aid.root"
+    ],
+    "โดนเข็มทิ่ม": [
+      "first_aid.root"
+    ],
+    "เข็มทิ่มตำทำไง": [
+      "first_aid.root"
+    ],
     "เกิดเหตุแล้วทำอย่างไร": [
       "first_aid.root"
     ],
     "เลือดเข้าตา": [
       "first_aid.eye"
     ],
+    "เลือดกระเด็นเข้าตา": [
+      "first_aid.eye"
+    ],
+    "กระเด็นเข้าตา": [
+      "first_aid.eye"
+    ],
     "เลือดเข้าปาก": [
       "first_aid.mouth"
     ],
+    "เลือดกระเด็นเข้าปาก": [
+      "first_aid.mouth"
+    ],
+    "กระเด็นเข้าปาก": [
+      "first_aid.mouth"
+    ],
     "การเจาะเลือด": [
+      "lab.source.ic04"
+    ],
+    "เจาะเลือด": [
+      "lab.source.ic04"
+    ],
+    "ตรวจเลือดผู้ป่วย": [
+      "lab.source.ic04"
+    ],
+    "เจาะเลือดผู้ป่วย": [
+      "lab.source.ic04"
+    ],
+    "ขอข้อมูลการเจาะเลือด": [
       "lab.source.ic04"
     ],
     "IC04": [
       "lab.source.ic04"
     ],
     "IC05": [
+      "lab.staff.ic05"
+    ],
+    "กรณี IC05": [
       "lab.staff.ic05"
     ],
     "การรับยา oPEP": [
@@ -32,10 +92,49 @@
       "opep.office",
       "opep.after_hours"
     ],
+    "oPEP": [
+      "opep.office",
+      "opep.after_hours"
+    ],
+    "รับยา PEP": [
+      "opep.office",
+      "opep.after_hours"
+    ],
+    "รับยา oPEP": [
+      "opep.office",
+      "opep.after_hours"
+    ],
+    "การรับยา PEP": [
+      "opep.office",
+      "opep.after_hours"
+    ],
+    "ขอข้อมูล oPEP": [
+      "opep.office",
+      "opep.after_hours"
+    ],
+    "ขอข้อมูล PEP": [
+      "opep.office",
+      "opep.after_hours"
+    ],
+    "oPEP คืออะไร": [
+      "opep.definition"
+    ],
+    "PEP คืออะไร": [
+      "opep.definition"
+    ],
     "แนวทางปฏิบัติ": [
       "knowledge.overview"
     ],
+    "ขอแนวทางปฏิบัติ": [
+      "knowledge.overview"
+    ],
+    "ดูแนวทางปฏิบัติ": [
+      "knowledge.overview"
+    ],
     "ความรู้": [
+      "knowledge.overview"
+    ],
+    "ความรู้/แนวทางปฏิบัติ": [
       "knowledge.overview"
     ]
   },
@@ -57,6 +156,27 @@
       ],
       "ผลบวก": [
         "lab.source.positive"
+      ],
+      "ผล Positive": [
+        "lab.source.positive"
+      ],
+      "ผล Positive อย่างน้อยหนึ่งตัว": [
+        "lab.source.positive"
+      ],
+      "ผล Positive ตัวใดตัวหนึ่ง": [
+        "lab.source.positive"
+      ],
+      "ผลบวกอย่างน้อยหนึ่งตัว": [
+        "lab.source.positive"
+      ],
+      "ผล Negative": [
+        "lab.source.negative"
+      ],
+      "ผล Negative ทุกตัว": [
+        "lab.source.negative"
+      ],
+      "ผลลบทุกตัว": [
+        "lab.source.negative"
       ]
     },
     "lab.source.positive": {
@@ -64,6 +184,12 @@
         "exposure.office"
       ],
       "นอกเวลา": [
+        "exposure.after_hours"
+      ],
+      "ในเวลาราชการ": [
+        "exposure.office"
+      ],
+      "นอกเวลาราชการ": [
         "exposure.after_hours"
       ]
     },

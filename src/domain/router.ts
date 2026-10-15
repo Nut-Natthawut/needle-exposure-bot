@@ -1,3 +1,5 @@
+import {normalizeUserText} from './text-input';
+
 export interface Route {
   routeId: string;
   category: string;
@@ -18,15 +20,9 @@ export type Resolution =
   | { kind: 'choices'; routes: Route[] }
   | { kind: 'fallback'; reason: 'not_found' | 'missing_context' | 'unavailable' };
 
-// Only whitespace is insignificant. Case, punctuation, numbers and Thai
-// spelling are preserved; new variants must be registered as explicit aliases.
-function normalize(text: string): string {
-  return text.trim().replace(/\s+/gu, ' ');
-}
-
 function matchAliases(text: string, map: Record<string, string[]>): string[] {
   const matches = Object.entries(map)
-    .filter(([alias]) => normalize(alias) === text)
+    .filter(([alias]) => normalizeUserText(alias) === text)
     .flatMap(([, ids]) => ids);
   return [...new Set(matches)];
 }
@@ -51,7 +47,7 @@ export function resolveAction(input: ActionInput, routes: readonly Route[], alia
     return resolveTargets([input.value], index);
   }
 
-  const text = normalize(input.value);
+  const text = normalizeUserText(input.value);
   if (!text) return {kind: 'fallback', reason: 'not_found'};
   if (input.lastRouteId && index.get(input.lastRouteId)?.enabled &&
       Object.hasOwn(aliases.byLastRoute, input.lastRouteId)) {

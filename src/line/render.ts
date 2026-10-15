@@ -1,10 +1,12 @@
 import ui from '../../content/ui.json';
 import metadata from '../../content/metadata.json';
 import type { ActionInput, Resolution, Route } from '../domain/router';
+import type { TopicSuggestion } from '../domain/topic-suggestions';
+import {normalizeUserText} from '../domain/text-input';
 import type { ReplyMessage, FlexMessage, FlexComponent, FlexAction, FlexBox, QuickReplyItem } from './reply';
 
 type Link = {routeId:string; label:string};
-export type UiCommand = 'home'|'reset'|'report'|'contact'|'opep'|'unsupported';
+export type UiCommand = 'home'|'reset'|'report'|'contact'|'opep'|'unsupported'|'greeting'|'thanks';
 const colors = {ink:'#173D43', muted:'#46656A', teal:'#007F79', heading:'#0B4F4A', mint:'#E7F5F2', surface:'#F5FAF8', white:'#FFFFFF', warning:'#FFF1F0', warningInk:'#9C3039'};
 
 function text(value:string, color = colors.ink): FlexComponent {
@@ -54,17 +56,26 @@ function quickReply(links:readonly Link[]): {items:QuickReplyItem[]} {
   return {items:links.filter(link=>[...link.label].length <= 20).slice(0,13).map(link=>({type:'action',action:{type:'postback',label:link.label,data:link.routeId}}))};
 }
 export function resolveUiCommand(input:ActionInput): UiCommand|null {
-  const allowed:UiCommand[] = ['home','reset','report','contact','opep'];
+  const allowed:UiCommand[] = ['home','reset','report','contact','opep','greeting','thanks'];
   if (input.kind === 'postback') return allowed.find(command=>input.value === `ui.${command}`) ?? null;
   const aliases:Record<string,string> = ui.uiAliases;
-  const key = input.value.trim().replace(/\s+/gu,' ');
-  const command = Object.hasOwn(aliases,key) ? aliases[key] : undefined;
-  return allowed.find(item=>item === command) ?? null;
+  const key = normalizeUserText(input.value);
+  const matches = new Set(Object.entries(aliases)
+    .filter(([alias]) => normalizeUserText(alias) === key)
+    .map(([,command]) => allowed.find(item => item === command))
+    .filter((command):command is UiCommand => command !== undefined));
+  return matches.size === 1 ? [...matches][0]! : null;
 }
 export function renderUi(command:Exclude<UiCommand,'opep'>): ReplyMessage[] {
   if (command === 'report') return [card(ui.reportTitle,ui.reportWarning,[actionButton({type:'uri',label:ui.reportLabel,uri:ui.reportUrl},'primary'),homeButton()],{bodyTone:'warning'}),{type:'text',text:ui.reportUrl}];
-  const value = command === 'home' ? ui.welcome : command === 'reset' ? ui.reset : command === 'unsupported' ? ui.unsupported : ui.contactPending;
+  const value = command === 'home' || command === 'greeting' ? ui.welcome : command === 'thanks' ? ui.thanks : command === 'reset' ? ui.reset : command === 'unsupported' ? ui.unsupported : ui.contactPending;
   return [{type:'text',text:value},homeCard()];
+}
+export function renderTopicSuggestion(topic:TopicSuggestion):ReplyMessage[] {
+  return [{type:'text',text:`หมายถึง${topic.label}ใช่ไหมครับ?`,quickReply:quickReply([
+    {routeId:topic.postbackId,label:ui.confirmTopicLabel},
+    {routeId:'ui.home',label:ui.otherTopicLabel},
+  ])}];
 }
 export function renderRoute(route:Route): ReplyMessage[] {
   if (!route.enabled) return renderResolution({kind:'fallback',reason:'unavailable'});

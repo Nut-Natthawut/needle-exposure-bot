@@ -1,10 +1,12 @@
 import routes from '../content/routes.json';
 import aliases from '../content/aliases.json';
+import ui from '../content/ui.json';
 import { resolveAction } from './domain/router';
+import { suggestTopic } from './domain/topic-suggestions';
 import { reply, type Fetcher } from './line/reply';
 import { verifyLineSignature } from './line/signature';
 import { isRecord, parseEvent } from './line/events';
-import { renderResolution, renderUi, resolveUiCommand } from './line/render';
+import { renderResolution, renderTopicSuggestion, renderUi, resolveUiCommand } from './line/render';
 import { createState, type StateKV } from './domain/state';
 
 type RuntimeEnv = Pick<Env, 'LINE_CHANNEL_SECRET' | 'LINE_CHANNEL_ACCESS_TOKEN'> & {
@@ -59,7 +61,10 @@ export function createWebhookHandler(fetcher: Fetcher = fetch, now = Date.now) {
       const command = event.action.kind === 'follow' ? 'home' : event.action.kind === 'unsupported' ? 'unsupported' : resolveUiCommand(event.action);
       const resolution = command === 'opep' ? resolveAction({kind:'text',value:'PEP'},routes,aliases)
         : command || event.action.kind === 'follow' || event.action.kind === 'unsupported' ? null : resolveAction({...event.action, lastRouteId:await state.getLastRouteId(event.userId) ?? undefined}, routes, aliases);
-      const messages = command && command !== 'opep' ? renderUi(command) : renderResolution(resolution!);
+      const suggestion = event.action.kind === 'text' && resolution?.kind === 'fallback' && resolution.reason === 'not_found'
+        ? suggestTopic(event.action.value,ui.topicSuggestions) : null;
+      const messages = command && command !== 'opep' ? renderUi(command)
+        : suggestion ? renderTopicSuggestion(suggestion) : renderResolution(resolution!);
       const result = await reply(event.replyToken, messages, env.LINE_CHANNEL_ACCESS_TOKEN, fetcher);
       if (!result.ok) {
         // Temporary live probe: never log body, identifiers, credentials or exceptions.
@@ -71,7 +76,13 @@ export function createWebhookHandler(fetcher: Fetcher = fetch, now = Date.now) {
       }
       await state.markReplied(event.eventId);
       if (resolution?.kind === 'route') await state.putLastRouteId(event.userId, resolution.route.routeId);
-      else await state.clearLastRouteId(event.userId);
+      else {
+        // Small talk and unrecognized text are detours, not topic resets.
+        // Leave the stored value/expiry untouched; never refresh context here.
+        const preserveContext = command === 'greeting' || command === 'thanks' ||
+          (event.action.kind === 'text' && resolution?.kind === 'fallback' && resolution.reason === 'not_found');
+        if (!preserveContext) await state.clearLastRouteId(event.userId);
+      }
     }
     return new Response(failed ? 'Reply failed' : 'OK', {status:failed ? 502 : 200});
   };

@@ -226,3 +226,79 @@ their pre-edit hashes. See line-response-style.md for the visual-only scope.
 No commit/push/deploy, secret change, live LINE message or menu installation.
 Phone rendering, dark-mode behavior and larger system fonts remain manual
 acceptance gates; local payload/contrast checks do not prove actual LINE layout.
+
+2026-10-16: Owner approved friendly conversation behavior in the existing
+folder/branch. Replaced welcome with the exact two-line greeting chosen by
+the owner; added explicit greeting/thanks aliases, a friendly unknown-text
+menu prompt and four explicit topic variants. Humanizer was used only to
+edit non-clinical UI copy during development, not as a runtime dependency.
+
+Added domain/topic-suggestions.ts: after exact routing fails, compare against
+an allowlist of Thai top-level topic terms from ui.json. Only a unique topic
+within one insertion/deletion/substitution is offered, with confirmation and
+other-topic Quick Replies. No answer or context is created before confirmation.
+Inputs over 64 characters, under 5 characters, numbers, Latin codes and
+punctuation are excluded. No clinical branch/result/time/drug/dose matching,
+substring routing, LLM, external medical lookup, new dependency or paid service.
+Report confirmation retains the existing warning-first flow. Manual OA Manager
+D/F links, deferred contact alignment, clinical route contents/enabled flags
+and metadata are unchanged.
+
+Greeting/thanks, unmatched text and suggestions preserve the current context
+without a context write or TTL renewal. Explicit home/reset, unavailable or
+missing context, and ambiguous clinical choices retain their clearing behavior.
+Successful route replies still replace the topic; reply failure and event
+deduplication ordering are unchanged. No raw questions or pending suggestion
+state are stored in KV. README structure/flow and the original spec now explain
+the owner-approved confirmation-only exception to the original no-fuzzy policy.
+
+Evidence: 44 failing conversation assertions observed before implementation
+(unknown greeting, missing aliases/suggestions, discarded context); all 45 then
+passed. Added 21 suggestion boundary/configuration tests; 66 focused tests pass.
+Native workerd tests now exercise the new greeting, thanks and suggestion
+payload, including the confirmation actions. Initial sandbox full run failed
+5 native-runtime tests solely because localhost listen was denied (EPERM).
+Rerunning with localhost permission passed; final fresh full suite: 276/276
+across 17 files. Typecheck, content:check, rich-menu:check and diff whitespace
+checks pass. SHA256 of routes.json, metadata.json, config/rich-menu.json and
+both Rich Menu PNGs matches the pre-edit baseline; no source snapshots changed.
+Independent read-only review found no actionable issues and independently
+passed 136 focused tests, typecheck and content validation.
+
+No commit, push, deploy, secret change, live LINE API call or menu installation
+was performed. Phone/real OA rendering and medical approval of the unchanged
+source corpus remain outside automated verification.
+
+2026-10-16 follow-up: Owner requested broader phrasing coverage after seeing
+the exact gaps (greetings with !, polite endings, lowercase pep, full service-time
+labels and English result wording). Added shared domain/text-input.ts for
+whitespace, ASCII case, one allowlisted Thai polite suffix and selected terminal
+punctuation only. Both clinical/UI alias matching and topic suggestions use it;
+postbacks remain exact. Negation, numbers, +/- signs, non-formatting/internal
+punctuation and unregistered medical words are not discarded or inferred.
+
+Added explicit top-level topic/question variants, oPEP definition/topic forms,
+report/menu/reset/contact phrases and contextual English result/full time labels.
+All responses still use existing enabled routes or UI actions. Generic needle
+phrases can start first_aid.root; the contextual เข็มตำ branch still takes
+precedence as first_aid.sharp_skin within that topic. No new clinical statement,
+route, status, external source, URL, dependency, credential or infrastructure.
+Ambiguous treatment/time choices still require user selection; this is not
+unrestricted natural-language understanding. README structure/flow, spec and
+content-review now describe the approved normalization and explicit-alias scope.
+
+Evidence: 62 new coverage/conversation failures before implementation, then
+4 short needle-phrase failures before registering those aliases. Final focused
+suite 184 tests passes. The alias matrix checks 63 global/context entries over
+8 suffixes and 6 punctuation styles (3,024 combinations) against declared
+destinations, alongside literal expected examples, wrong/missing context,
+mixed/negative results, identifiers, codes, numbers, signs, postback strictness
+and normalized collisions. Native workerd coverage includes formatted greeting,
+polite topic request, lowercase pep and polite typo-confirmation payloads.
+
+Fresh full suite: 368/368 across 18 files; typecheck, content:check,
+rich-menu:check and whitespace checks pass. Independent read-only review found
+no actionable issues (191 focused tests for the main wording change, then 111
+coverage/router tests for the final aliases). Clinical corpus/metadata and menu
+config/artwork retain baseline hashes. No commit, push, deploy or live LINE API
+call was performed; owner still needs real-phone acceptance after deployment.

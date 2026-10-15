@@ -46,7 +46,7 @@ describe('deterministic routing', () => {
     expect(result.kind).toBe('route');
     if (result.kind === 'route') expect(result.route.routeId).toBe('first_aid.eye');
   });
-  it.each(['HN 123 เข็มทิ่มตำ', 'เข็มทิ่มตำ นายสมชาย', 'เลือดเข้าตา ต้องใช้ยาอะไร', 'ผมติดเชื้อไหม', 'เข็มทิ่มตํา', '', 'IC06', 'เข็มทิ่มตำ?'])('does not infer a clinical route from %s', value => {
+  it.each(['HN 123 เข็มทิ่มตำ', 'เข็มทิ่มตำ นายสมชาย', 'เลือดเข้าตา ต้องใช้ยาอะไร', 'ผมติดเชื้อไหม', 'เข็มทิ่มตํา', '', 'IC06'])('does not infer a clinical route from %s', value => {
     expect(resolveAction({kind: 'text', value}, routes, aliases)).toEqual({kind: 'fallback', reason: 'not_found'});
   });
   it('prioritizes an alias in the active context over a global alias', () => {

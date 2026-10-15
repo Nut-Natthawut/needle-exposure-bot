@@ -13,6 +13,8 @@ LINE OA bot: TypeScript + Cloudflare Workers, deterministic JSON routes.
 │   ├── index.ts                    [ทำแล้ว] POST /webhook และประสานระบบ
 │   ├── domain/                     กฎการเลือกคำตอบและสถานะสนทนา
 │   │   ├── router.ts               [ทำแล้ว] เลือก route / choices / fallback
+│   │   ├── text-input.ts           [ทำแล้ว] ปรับรูปแบบคำพิมพ์ ไม่เปลี่ยนข้อมูลทางคลินิก
+│   │   ├── topic-suggestions.ts    [ทำแล้ว] เสนอชื่อหัวข้อใกล้เคียง รอกดยืนยันก่อนตอบ
 │   │   └── state.ts                [ทำแล้ว] บริบทล่าสุดและ event กันซ้ำผ่าน KV
 │   └── line/                       ส่วนเชื่อมต่อ LINE โดยเฉพาะ
 │       ├── signature.ts            [ทำแล้ว] ตรวจผู้ส่ง webhook ด้วย raw body
@@ -49,6 +51,9 @@ LINE OA bot: TypeScript + Cloudflare Workers, deterministic JSON routes.
 │   ├── render.test.ts              [ทำแล้ว] การ์ด/ข้อความครบ/คำเตือน/ข้อจำกัด LINE
 │   ├── visual-style.test.ts        [ทำแล้ว] ความชัดหัวการ์ด/กล่องเตือน/ระยะบรรทัด/ปุ่มกลับ
 │   ├── navigation.test.ts          [ทำแล้ว] เมนู/ถามต่อ/เปลี่ยนหัวข้อ/ทุกปุ่มไปถึงคำตอบ
+│   ├── conversation.test.ts        [ทำแล้ว] ทักทาย/คำใกล้เคียง/ยืนยัน/รักษาหัวข้อเดิม
+│   ├── topic-suggestions.test.ts   [ทำแล้ว] ขอบเขตคำใกล้เคียงและไม่เดากรณีทางการแพทย์
+│   ├── text-coverage.test.ts       [ทำแล้ว] สำนวน/คำลงท้าย/ตัวพิมพ์/บริบท/ไม่ตัดเงื่อนไข
 │   ├── rich-menu.test.ts           [ทำแล้ว] ภาพ/พิกัด/6 postbacks เข้า webhook จริง
 │   ├── rich-menu-install.test.ts   [ทำแล้ว] create/upload/default/reuse/failure แบบจำลอง API
 │   ├── support/memory-kv.ts        [ทำแล้ว] KV จำลองสำหรับ tests ไม่ใช่ฐานข้อมูลจริง
@@ -97,7 +102,12 @@ Worker นั้น ไม่ใช่เซิร์ฟเวอร์หรื
    ถ้าพบ event ซ้ำ หยุดโดยไม่ตอบซ้ำ; บริบทหมดอายุถือว่าไม่มีหัวข้อก่อนหน้า
 5. `domain/router.ts` ใช้ `routes.json` และ `aliases.json` เลือกผลลัพธ์:
    route ที่ตรง, หลายกรณีให้เลือก, หรือ fallback เมื่อไม่พบ/ขาดบริบท/ข้อมูลปิดอยู่
-   ข้อความต้องตรง alias ทั้งข้อความหลังปรับช่องว่าง ไม่มี fuzzy matching หรือ AI
+   ข้อความต้องตรง alias ทั้งข้อความหลัง `text-input.ts` ปรับช่องว่าง ตัวพิมพ์อังกฤษ
+   คำลงท้ายสุภาพ 1 ชุด และเครื่องหมายท้ายข้อความที่กำหนด (`? ! . 。 … ！ ？`)
+   ไม่ตัดคำปฏิเสธ ตัวเลข เครื่องหมาย +/- หรือข้อความกลางประโยค ไม่มีการเดา route คลินิกหรือ AI
+   คำทักทาย/ขอบคุณแยกเป็น UI; หากไม่พบคำตรง `topic-suggestions.ts` อาจเสนอ
+   ชื่อหัวข้อเมนูภาษาไทยที่ต่างไม่เกิน 1 ตัวอักษรตามรายการใน `ui.json`
+   ต้องกดปุ่มยืนยันก่อนเข้าหัวข้อนั้น ไม่เสนอกรณีย่อย ผลตรวจ ชื่อยา รหัส หรือตัวเลข
 6. `line/render.ts` อ่านข้อความจาก route หรือ `ui.json` แล้วจัดเป็น text/Flex/
    Quick Reply โดยรักษาข้อความคลินิกเดิม รวมทั้งแสดงคำเตือนข้อมูลไม่ครบใน route
    ที่ระบุไว้ใน `metadata.partialRouteIds`
@@ -114,7 +124,10 @@ eventual consistency หาก KV อ่านหรือเขียนไม�
 webhook คืนสถานะล้มเหลวให้ LINE (ต้องเปิด redelivery และไม่รับประกันการตอบซ้ำสำเร็จ)
 
 พิมพ์ “เริ่มใหม่” หรือ postback `ui.reset` เพื่อล้างบริบท; เมื่อได้หลายกรณีให้เลือก
-หรือ fallback จะล้างหัวข้อเดิมหลังตอบสำเร็จเช่นกัน TTL ตรวจจาก `expiresAt` ในค่า
+หรือ fallback ที่ขาดบริบท/ข้อมูลไม่พร้อม จะล้างหัวข้อเดิมหลังตอบสำเร็จเช่นกัน
+คำทักทาย ขอบคุณ ข้อความที่จับคู่ไม่ได้ และคำถามยืนยันหัวข้อใกล้เคียงจะไม่ล้าง
+หรือยืดอายุหัวข้อเดิม กด “เลือกหัวข้ออื่น” จะเข้า `ui.home` และล้างบริบท
+TTL ตรวจจาก `expiresAt` ในค่า
 ด้วย จึงไม่ใช้ค่าที่หมดอายุแม้ KV ยังส่งค่าค้างมา หากเขียนหัวข้อใหม่ไม่ได้จะพยายาม
 ลบหัวข้อเดิม แต่ KV อาจยังอ่านค่าเก่าที่ยังไม่หมดอายุได้ระหว่างแพร่ข้อมูล และ
 event ที่เข้าพร้อมกันอาจตอบซ้ำได้ ไม่รับประกัน latest-context หรือ exactly-once
@@ -196,15 +209,25 @@ npm run typecheck
 npm run dev
 ```
 
-Current stage: visual-only Flex polish and owner-configured OA Manager Rich Menu; mobile acceptance pending. Only POST /webhook is accepted;
+Current stage: source-preserving Flex replies, friendly conversation copy and confirmed topic suggestions; owner-configured OA Manager Rich Menu, mobile acceptance pending. Only POST /webhook is accepted;
 other paths return 404. PDF transcription, alias maps and UI
 copy are under content/. See docs/source-map.md for source pages and disabled
 ambiguous cases.
 
 `src/domain/router.ts` resolves exact menu postbacks and registered text aliases
 without I/O. Ambiguous matches return choices. Follow-ups require the correct
-last route. It normalizes whitespace only; punctuation and spelling variants
-need explicit aliases.
+last route. `text-input.ts` tolerates whitespace, ASCII case, one allowlisted
+Thai polite ending and terminal question/exclamation marks, periods or ellipses.
+It preserves negation, numbers, +/- signs and internal punctuation; it never
+normalizes postback IDs. Other wording/spelling variants need explicit aliases.
+
+`src/domain/topic-suggestions.ts` handles only the allowlisted Thai menu topic
+names in `ui.json`, after exact routing fails. It accepts at most one character
+edit and a unique topic, rejects numbers/codes/non-formatting punctuation and inputs over 64
+characters, and returns a confirmation prompt only. The confirmation postback
+uses the existing router/UI flow; it does not create a clinical answer. Small
+talk and unrecognized text preserve the existing context without renewing TTL.
+Humanizer is a development-time copy-editing skill, not a runtime AI service.
 
 `npm run content:check` checks clinical schema, route IDs, versions, destination
 links and aliases. Test fixtures are not clinical content. Deployment runs
