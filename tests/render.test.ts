@@ -3,7 +3,7 @@ import routes from '../content/routes.json';
 import ui from '../content/ui.json';
 import metadata from '../content/metadata.json';
 import { renderRoute, renderChoices, renderUi, renderResolution, renderTopicSuggestion } from '../src/line/render';
-import { clinicalText, componentText } from './support/rendered-content';
+import { clinicalText, componentText, componentActions } from './support/rendered-content';
 
 const find = (id:string) => routes.find(r => r.routeId === id)!;
 
@@ -60,7 +60,7 @@ it('reports with the approved warning before a URI button and a copyable URL', (
   }
   expect(messages[1]).toEqual({type:'text',text:ui.reportUrl});
 });
-it('shows every owner-supplied contact in a readable card without inferring dialing instructions', () => {
+it('groups the supplied contacts with a direct phone-app button for each unchanged number', () => {
   const messages = renderUi('contact');
   expect(messages).toHaveLength(1);
   const message = messages[0];
@@ -68,16 +68,23 @@ it('shows every owner-supplied contact in a readable card without inferring dial
   if(message?.type!=='flex')throw new Error('Expected contact card');
   const block = message.contents.body.contents[1];
   if(block?.type!=='box')throw new Error('Expected contact details');
-  expect(block.contents.map(componentText)).toEqual([
-    'งานป้องกันและควบคุมการติดเชื้อในโรงพยาบาล','1178 / 9270',
-    'ห้องตรวจอาชีวเวชกรรม','9274',
-    'ห้องฉุกเฉิน','1105 / 1106 / 9269',
+  const groups=block.contents.filter(item=>item.type==='box');
+  expect(groups.map(componentText)).toEqual([
+    'งานป้องกันและควบคุมการติดเชื้อในโรงพยาบาล1178 / 9270',
+    'ห้องตรวจอาชีวเวชกรรม9274',
+    'ห้องฉุกเฉิน1105 / 1106 / 9269',
+  ]);
+  expect(groups.map(componentActions)).toEqual([
+    [{type:'uri',label:'โทร 1178',uri:'tel:1178'},{type:'uri',label:'โทร 9270',uri:'tel:9270'}],
+    [{type:'uri',label:'โทร 9274',uri:'tel:9274'}],
+    [{type:'uri',label:'โทร 1105',uri:'tel:1105'},{type:'uri',label:'โทร 1106',uri:'tel:1106'},{type:'uri',label:'โทร 9269',uri:'tel:9269'}],
   ]);
   expect(message.contents.footer?.contents).toEqual([expect.objectContaining({
     action:{type:'postback',label:'กลับเมนูหลัก',data:'ui.home'},
   })]);
   const payload = JSON.stringify(messages);
-  for(const unknown of ['tel:','เบอร์ภายใน','053','พรีเมียม','อยู่ระหว่างจัดเตรียม']) expect(payload).not.toContain(unknown);
+  for(const unknown of ['เบอร์ภายใน','053','พรีเมียม','อยู่ระหว่างจัดเตรียม']) expect(payload).not.toContain(unknown);
+  expect(componentText(block)).toBe('งานป้องกันและควบคุมการติดเชื้อในโรงพยาบาล1178 / 9270ห้องตรวจอาชีวเวชกรรม9274ห้องฉุกเฉิน1105 / 1106 / 9269');
 });
 it('offers all six topics even before Rich Menu is installed', () => {
   const messages = renderUi('home');
@@ -121,7 +128,7 @@ it('keeps every current outgoing card and action within LINE limits',()=>{
     if(c.type==='button') {
       expect([...c.action.label].length).toBeLessThanOrEqual(40);
       if(c.action.type==='postback') expect(c.action.data.length).toBeLessThanOrEqual(300);
-      else expect(c.action.uri).toBe(ui.reportUrl);
+      else expect([ui.reportUrl,'tel:1178','tel:9270','tel:9274','tel:1105','tel:1106','tel:9269']).toContain(c.action.uri);
     }
     if(c.type==='text') {expect(c.wrap).toBe(true);expect(c.text.length).toBeLessThanOrEqual(2000);}
   }

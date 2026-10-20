@@ -33,10 +33,10 @@ function contentBlock(value:string): FlexBox {
 function warningBlock(value:string): FlexBox {
   return {type:'box',layout:'vertical',backgroundColor:colors.warning,cornerRadius:'12px',paddingAll:'16px',contents:[text(value,colors.warningInk)]};
 }
-function card(title:string, value:string, actions:FlexComponent[], options:{partial?:boolean; bodyTone?:'warning'} = {}): FlexMessage {
+function card(title:string, value:string|FlexBox, actions:FlexComponent[], options:{partial?:boolean; bodyTone?:'warning'} = {}): FlexMessage {
   const contents:FlexComponent[] = [
     {type:'box',layout:'vertical',backgroundColor:colors.heading,cornerRadius:'12px',paddingAll:'16px',contents:[{type:'text',text:title,wrap:true,lineSpacing:'6px',size:'lg',weight:'bold',color:colors.white}]},
-    options.bodyTone === 'warning' ? warningBlock(value) : contentBlock(value),
+    typeof value !== 'string' ? value : options.bodyTone === 'warning' ? warningBlock(value) : contentBlock(value),
   ];
   if (options.partial) contents.push(warningBlock(ui.partialContent));
   return {type:'flex',altText:title,contents:{type:'bubble',size:'mega',
@@ -49,6 +49,16 @@ function homeCard(): FlexMessage {
 }
 function homeButton(): FlexComponent {
   return actionButton({type:'postback',label:ui.homeLabel,data:'ui.home'},'link');
+}
+function contactCard():FlexMessage {
+  const groups:FlexComponent[] = ui.contacts.map(unit => ({
+    type:'box',layout:'vertical',spacing:'sm',contents:[
+      {type:'text',text:unit.name,wrap:true,lineSpacing:'6px',size:'md',color:colors.ink,weight:'bold'},
+      text(unit.numbers.join(' / '),colors.muted),
+      ...unit.numbers.map(number => actionButton({type:'uri',label:`โทร ${number}`,uri:`tel:${number}`})),
+    ],
+  }));
+  return card(ui.contactTitle,{type:'box',layout:'vertical',spacing:'xl',contents:groups},[homeButton()]);
 }
 function quickReply(links:readonly Link[]): {items:QuickReplyItem[]} {
   // Quick Reply permits 20 characters. Longer labels remain intact on the
@@ -68,7 +78,7 @@ export function resolveUiCommand(input:ActionInput): UiCommand|null {
 }
 export function renderUi(command:Exclude<UiCommand,'opep'>): ReplyMessage[] {
   if (command === 'report') return [card(ui.reportTitle,ui.reportWarning,[actionButton({type:'uri',label:ui.reportLabel,uri:ui.reportUrl},'primary'),homeButton()],{bodyTone:'warning'}),{type:'text',text:ui.reportUrl}];
-  if (command === 'contact') return [card(ui.contactTitle,ui.contactDetails,[homeButton()])];
+  if (command === 'contact') return [contactCard()];
   const value = command === 'home' || command === 'greeting' ? ui.welcome : command === 'thanks' ? ui.thanks : command === 'reset' ? ui.reset : ui.unsupported;
   return [{type:'text',text:value},homeCard()];
 }

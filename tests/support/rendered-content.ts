@@ -1,4 +1,10 @@
-import type { ReplyMessage, FlexComponent } from '../../src/line/reply';
+import type { ReplyMessage, FlexComponent, FlexAction } from '../../src/line/reply';
+
+export function componentActions(component:FlexComponent):FlexAction[] {
+  if(component.type==='button')return [component.action];
+  if(component.type==='box')return component.contents.flatMap(componentActions);
+  return [];
+}
 
 // Read visible payloads without calling the production formatter. A missing
 // line, reordered step, or modified word must fail the approved source baseline.

@@ -5,7 +5,7 @@ import {createHmac} from 'node:crypto';
 import routes from '../content/routes.json';
 import ui from '../content/ui.json';
 import type {ReplyMessage} from '../src/line/reply';
-import {clinicalText} from './support/rendered-content';
+import {clinicalText,componentText,componentActions} from './support/rendered-content';
 
 // Real reply implementation + native workerd fetch. Only the external API is fake.
 // Node fetch doubles cannot detect unsupported Workers RequestInit options.
@@ -88,7 +88,12 @@ it('native Worker delivers every enabled answer and UI command as complete LINE 
       else expect(JSON.stringify(payloads.at(-1))).not.toContain(ui.fallback);
       if(value==='เจาะเลืด'||value==='เจาะเลืดครับ?') expect(payloads.at(-1)!.messages[0]).toMatchObject({type:'text',text:'หมายถึงการเจาะเลือดใช่ไหมคะ?',quickReply:{items:[{type:'action',action:{type:'postback',label:'ใช่ ดูหัวข้อนี้',data:'lab.source.ic04'}},{type:'action',action:{type:'postback',label:'เลือกหัวข้ออื่น',data:'ui.home'}}]}});
       if(value==='เจาะเลือดครับ!') expect(clinicalText(payloads.at(-1)!.messages[0]!)).toBe(routes.find(route=>route.routeId==='lab.source.ic04')!.text);
-      if(value==='ui.contact') expect(clinicalText(payloads.at(-1)!.messages[0]!)).toBe('งานป้องกันและควบคุมการติดเชื้อในโรงพยาบาล\n1178 / 9270\nห้องตรวจอาชีวเวชกรรม\n9274\nห้องฉุกเฉิน\n1105 / 1106 / 9269');
+      if(value==='ui.contact') {
+        const contact=payloads.at(-1)!.messages[0];
+        if(contact?.type!=='flex')throw new Error('Expected contact card');
+        expect(componentText(contact.contents.body)).toContain('งานป้องกันและควบคุมการติดเชื้อในโรงพยาบาล1178 / 9270ห้องตรวจอาชีวเวชกรรม9274ห้องฉุกเฉิน1105 / 1106 / 9269');
+        expect(componentActions(contact.contents.body).map(action=>action.type==='uri'?action.uri:'')).toEqual(['tel:1178','tel:9270','tel:9274','tel:1105','tel:1106','tel:9269']);
+      }
     }
     expect(payloads).toHaveLength(39);
   } finally {await runtime.dispose();}

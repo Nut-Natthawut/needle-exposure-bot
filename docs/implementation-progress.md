@@ -350,3 +350,44 @@ checks pass. Existing native workerd test asserts feminine suggestion copy.
 Independent read-only reviewer passed 187 render/conversation/coverage/snapshot
 tests and found no issues. Response-style docs reflect the new voice. Contact
 work remains intact; no commit, push, deploy or live LINE mutation was performed.
+
+2026-10-20 phone-button follow-up: Owner explicitly requested choosing a supplied
+department number and opening the phone app, and clarified that the numbers were
+provided by the departments. Use all six digits exactly as supplied, not a
+guessed main number/extension sequence or an unsolicited data-error warning.
+Moved contact content to structured ui.contacts (3 named units, 6 number strings)
+plus neutral feminine helper copy. Existing Flex card now supports a structured
+content block without changing any clinical string rendering. Contact groups
+show full names, copyable numbers and full-width โทร [number] URI buttons for
+tel:1178, tel:9270, tel:9274, tel:1105, tel:1106 and tel:9269; footer remains home.
+No backend call service, automatic calling, new endpoint/dependency, phone-number
+rewriting, extra LINE event or live configuration mutation was introduced.
+
+Evidence: observed 5 failing renderer/signed-navigation assertions before adding
+the buttons, then 72 scoped tests passed. Added test action traversal without
+changing clinical text extraction. Tests verify each unit's exact number/URI
+pairing, UI aliases, six-menu navigation, native workerd outgoing payload and
+LINE size/style limits. Fresh full suite: 373/373 across 18 files; typecheck,
+content:check and whitespace checks pass. Impeccable detector returned no
+findings; independent read-only reviewer passed 73 focused tests/typecheck/
+content validation with no issues. Routes/metadata/aliases/router/state/menu
+assets/config remain unchanged. Actual phone-app opening is a mobile acceptance
+step; tests do not place calls. Docs updated to the owner's requested behavior.
+No commit, push, deploy or live LINE action was performed in this task.
+
+2026-10-21 contact helper wording: Owner clarified that Humanizer should improve
+the bot's visible contact copy, not just the assistant's replies. Replaced
+contactHelp with “แตะเบอร์ที่ต้องการโทรได้เลยค่ะ” to describe the user's task
+directly. Updated the existing rendered-output expectation and response-style
+guide. No other UI copy, contact number/action, layout or clinical content was
+changed in this follow-up. Observed the existing test fail for the old wording,
+then the full 373/373 tests, typecheck, content:check and whitespace checks pass.
+Existing uncommitted phone-button work is preserved; no commit/push/deploy.
+
+2026-10-21 contact copy decision: Owner selected removing the introduction
+entirely. Removed contactHelp and its rendered text component; the card now goes
+straight from its title to the three department/number groups. Updated the
+existing output expectation and response-style guide. Six phone actions, digits,
+department names, home action and all clinical content remain unchanged. Watched
+the contact test fail on the extra introduction, then all 373/373 tests passed;
+typecheck, content:check and whitespace checks pass. No commit/push/deploy.
