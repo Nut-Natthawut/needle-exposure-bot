@@ -54,7 +54,6 @@ function contactCard():FlexMessage {
   const groups:FlexComponent[] = ui.contacts.map(unit => ({
     type:'box',layout:'vertical',spacing:'sm',contents:[
       {type:'text',text:unit.name,wrap:true,lineSpacing:'6px',size:'md',color:colors.ink,weight:'bold'},
-      text(unit.numbers.join(' / '),colors.muted),
       ...unit.numbers.map(number => actionButton({type:'uri',label:`โทร ${number}`,uri:`tel:${number}`})),
     ],
   }));

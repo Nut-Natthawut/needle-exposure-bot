@@ -43,8 +43,8 @@ it.each([
   expect(messages).toHaveLength(1);
   expect(messages[0]?.type).toBe('flex');
   if(messages[0]?.type!=='flex')throw new Error('Expected contact card');
-  expect(componentText(messages[0].contents.body)).toContain(
-    'งานป้องกันและควบคุมการติดเชื้อในโรงพยาบาล1178 / 9270ห้องตรวจอาชีวเวชกรรม9274ห้องฉุกเฉิน1105 / 1106 / 9269');
+  expect(componentText(messages[0].contents.body)).toBe(
+    'ติดต่อผู้เกี่ยวข้องงานป้องกันและควบคุมการติดเชื้อในโรงพยาบาลห้องตรวจอาชีวเวชกรรมห้องฉุกเฉิน');
   expect(componentActions(messages[0].contents.body).map(action=>action.type==='uri'?action.uri:'')).toEqual([
     'tel:1178','tel:9270','tel:9274','tel:1105','tel:1106','tel:9269',
   ]);

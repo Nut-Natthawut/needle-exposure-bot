@@ -59,6 +59,6 @@ it('all six actual menu postbacks work through signed webhook; report warns befo
   expect(sent[5]).toHaveLength(1);
   const contact=sent[5]?.[0];
   expect(contact?.type).toBe('flex');
-  if(contact?.type==='flex') expect(componentText(contact.contents.body)).toContain(
-    'งานป้องกันและควบคุมการติดเชื้อในโรงพยาบาล1178 / 9270ห้องตรวจอาชีวเวชกรรม9274ห้องฉุกเฉิน1105 / 1106 / 9269');
+  if(contact?.type==='flex') expect(componentText(contact.contents.body)).toBe(
+    'ติดต่อผู้เกี่ยวข้องงานป้องกันและควบคุมการติดเชื้อในโรงพยาบาลห้องตรวจอาชีวเวชกรรมห้องฉุกเฉิน');
 });

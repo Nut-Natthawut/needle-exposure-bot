@@ -70,9 +70,9 @@ it('groups the supplied contacts with a direct phone-app button for each unchang
   if(block?.type!=='box')throw new Error('Expected contact details');
   const groups=block.contents.filter(item=>item.type==='box');
   expect(groups.map(componentText)).toEqual([
-    'งานป้องกันและควบคุมการติดเชื้อในโรงพยาบาล1178 / 9270',
-    'ห้องตรวจอาชีวเวชกรรม9274',
-    'ห้องฉุกเฉิน1105 / 1106 / 9269',
+    'งานป้องกันและควบคุมการติดเชื้อในโรงพยาบาล',
+    'ห้องตรวจอาชีวเวชกรรม',
+    'ห้องฉุกเฉิน',
   ]);
   expect(groups.map(componentActions)).toEqual([
     [{type:'uri',label:'โทร 1178',uri:'tel:1178'},{type:'uri',label:'โทร 9270',uri:'tel:9270'}],
@@ -84,7 +84,7 @@ it('groups the supplied contacts with a direct phone-app button for each unchang
   })]);
   const payload = JSON.stringify(messages);
   for(const unknown of ['เบอร์ภายใน','053','พรีเมียม','อยู่ระหว่างจัดเตรียม']) expect(payload).not.toContain(unknown);
-  expect(componentText(block)).toBe('งานป้องกันและควบคุมการติดเชื้อในโรงพยาบาล1178 / 9270ห้องตรวจอาชีวเวชกรรม9274ห้องฉุกเฉิน1105 / 1106 / 9269');
+  expect(componentText(block)).toBe('งานป้องกันและควบคุมการติดเชื้อในโรงพยาบาลห้องตรวจอาชีวเวชกรรมห้องฉุกเฉิน');
 });
 it('offers all six topics even before Rich Menu is installed', () => {
   const messages = renderUi('home');

@@ -391,3 +391,13 @@ existing output expectation and response-style guide. Six phone actions, digits,
 department names, home action and all clinical content remain unchanged. Watched
 the contact test fail on the extra introduction, then all 373/373 tests passed;
 typecheck, content:check and whitespace checks pass. No commit/push/deploy.
+
+2026-10-21 contact number repetition: Owner requested removing the standalone
+number line (e.g. 1178 / 9270) because every number is already visible on its
+phone button. Removed only that text component from each department group.
+Department headings and all six original button labels/tel URIs remain intact;
+no change to clinical content, data, routing or rich-menu configuration.
+Updated rendered, signed-navigation, rich-menu and native Worker expectations
+to retain names/actions without duplicate number text. Observed 6 focused
+failures before the renderer change, then all 373/373 tests passed. Typecheck,
+content:check and whitespace checks pass. No commit/push/deploy in this follow-up.
