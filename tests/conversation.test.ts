@@ -28,13 +28,13 @@ function conversation() {
 
 it.each(['สวัสดี','สวัสดีครับ','สวัสดีค่ะ','สวัสดีคับ','หวัดดี','  สวัสดีครับ\n','สวัสดีครับ!','HELLO ครับ'])('welcomes %s with the approved short greeting and topic menu',async value => {
   const messages = await conversation().send(value);
-  expect(messages[0]).toEqual({type:'text',text:'สวัสดีครับ ผมเป็นบอตเข็มทิ่มตำ NKP\nเลือกหัวข้อที่อยากดูจากเมนูด้านล่างได้เลยครับ'});
+  expect(messages[0]).toEqual({type:'text',text:'สวัสดีค่ะ ฉันเป็นบอตเข็มทิ่มตำ NKP\nเลือกหัวข้อที่อยากดูจากเมนูด้านล่างได้เลยค่ะ'});
   expect(messages[1]?.type).toBe('flex');
 });
 
 it.each(['ขอบคุณ','ขอบคุณครับ','ขอบคุณค่ะ','ขอบคุณคับ'])('acknowledges %s without clinical advice',async value => {
   const messages = await conversation().send(value);
-  expect(messages[0]).toMatchObject({type:'text',text:'ยินดีครับ เลือกหัวข้อจากเมนูได้เลยครับ'});
+  expect(messages[0]).toMatchObject({type:'text',text:'ยินดีค่ะ เลือกหัวข้อจากเมนูได้เลยค่ะ'});
   expect(messages[1]?.type).toBe('flex');
 });
 
@@ -54,7 +54,7 @@ it.each(['เจาะเลืด','เจาะเลืิอด','เจา�
   const x = conversation();
   const messages = await x.send(value);
   expect(messages).toHaveLength(1);
-  expect(messages[0]).toMatchObject({type:'text',text:'หมายถึงการเจาะเลือดใช่ไหมครับ?'});
+  expect(messages[0]).toMatchObject({type:'text',text:'หมายถึงการเจาะเลือดใช่ไหมคะ?'});
   expect(messages[0]?.quickReply?.items.map(item => item.action)).toEqual([
     {type:'postback',label:'ใช่ ดูหัวข้อนี้',data:'lab.source.ic04'},
     {type:'postback',label:'เลือกหัวข้ออื่น',data:'ui.home'},
@@ -67,7 +67,7 @@ it.each(['เจาะเลืด','เจาะเลืิอด','เจา�
 it('routes a confirmed reporting topic through the existing warning, never straight to the form',async () => {
   const x = conversation();
   const messages = await x.send('รายงานความเสี่ย');
-  expect(messages[0]).toMatchObject({type:'text',text:'หมายถึงรายงานอุบัติการณ์ใช่ไหมครับ?'});
+  expect(messages[0]).toMatchObject({type:'text',text:'หมายถึงรายงานอุบัติการณ์ใช่ไหมคะ?'});
   expect(messages[0]?.quickReply?.items[0]?.action.data).toBe('ui.report');
   const confirmed = await x.send('ui.report','postback');
   expect(confirmed[0]?.type).toBe('flex');
@@ -76,7 +76,7 @@ it('routes a confirmed reporting topic through the existing warning, never strai
 
 it.each(['ผลบว','ผลล','ในเวล','นอกเวล','IC0','IC06','PE','oPE','HBIG','เจาะเลือด1','เจาะเลือด๑','เจาะเลือด-','สวัสดี ผลบวก','ขอบคุณ ผลลบ','HN 123 เจาะเลืด','เจาะเลือด ผลลบ','ผมติดเชื้อไหม',''])('does not guess medical qualifiers, codes, numbers or sentences: %s',async value => {
   const messages = await conversation().send(value);
-  expect(messages[0]).toMatchObject({type:'text',text:'ต้องการดูเรื่องไหนครับ เลือกจากเมนูด้านล่างได้เลย'});
+  expect(messages[0]).toMatchObject({type:'text',text:'ต้องการดูเรื่องไหนคะ เลือกจากเมนูด้านล่างได้เลย'});
   expect(messages[1]?.type).toBe('flex');
 });
 
@@ -108,7 +108,7 @@ it('does not extend clinical context lifetime with a greeting',async () => {
 
 it('offers a fresh menu for unknown text without echoing the input',async () => {
   const messages = await conversation().send('HN 12345 ชื่อทดสอบ');
-  expect(messages[0]).toMatchObject({type:'text',text:'ต้องการดูเรื่องไหนครับ เลือกจากเมนูด้านล่างได้เลย'});
+  expect(messages[0]).toMatchObject({type:'text',text:'ต้องการดูเรื่องไหนคะ เลือกจากเมนูด้านล่างได้เลย'});
   expect(JSON.stringify(messages)).not.toContain('12345');
   expect(messages[1]?.type).toBe('flex');
 });

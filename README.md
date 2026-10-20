@@ -65,6 +65,7 @@ LINE OA bot: TypeScript + Cloudflare Workers, deterministic JSON routes.
 │   ├── implementation-progress.md  [ทำแล้ว] ผลตรวจและการตัดสินใจระหว่างพัฒนา
 │   ├── line-response-style.md      [ทำแล้ว] รูปแบบคำตอบตามภาพ reference
 │   ├── content-review.md           [ทำแล้ว] ผลตรวจคำตอบ/ข้อจำกัด/รายการลองบนมือถือ
+│   ├── contact-details.md          [ทำแล้ว] เบอร์ติดต่อที่ผู้ใช้ให้/ข้อจำกัดวิธีโทร/การตั้งช่อง F
 │   ├── rich-menu.md                [ทำแล้ว] วิธีติดตั้งเองโดยไม่บันทึก key ลงไฟล์
 │   ├── rich-menu-image-prompt.md   [ทำแล้ว] prompt/reference และพิกัดภาพสุดท้าย
 │   ├── release-checklist.md        [รอทำ] ตรวจ LINE จริง/deploy/rollback

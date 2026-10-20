@@ -302,3 +302,51 @@ no actionable issues (191 focused tests for the main wording change, then 111
 coverage/router tests for the final aliases). Clinical corpus/metadata and menu
 config/artwork retain baseline hashes. No commit, push, deploy or live LINE API
 call was performed; owner still needs real-phone acceptance after deployment.
+
+2026-10-20: Owner supplied the actual contact-channel content: infection
+prevention/control 1178/9270, occupational medicine examination room 9274,
+emergency room 1105/1106/9269, with the full Thai department names preserved.
+The owner only tentatively identified these as internal numbers. Replace
+contactPending with contactTitle/contactDetails in ui.json and render through
+the existing Flex card/home button. No internal-number label, tel: action,
+main phone, hours, added medical guidance or inferred case-to-unit routing.
+Partial website corroboration does not establish all current phone numbers;
+displayed data remains the owner's supplied source. See contact-details.md.
+
+Reused the existing dark-green/white card, wrapped text and spacing per the
+Impeccable scoped clarification guidance. Its mechanical detector returned no
+findings; payload contrast/wrapping tests now include the contact card. These
+checks are not a live LINE/mobile screenshot or confirmation that numbers work.
+No product/design scaffold or unrelated restyling was introduced.
+
+Evidence: 5 intended renderer/navigation failures before implementation, then
+67 scoped tests passed. First full run had 371 passes and 1 stale rich-menu
+assertion expecting contactPending (also caught by typecheck). Updated that
+consumer to verify the exact new Flex contact text, not to weaken the contract.
+Fresh full suite: 372/372 across 18 files; typecheck, content:check and whitespace
+checks pass. Native workerd validates the complete contact payload. Independent
+read-only reviewer passed 71 scoped tests/typecheck/content validation and found
+no actionable issues. Clinical corpus, aliases, metadata, menu images/config
+remain unchanged from HEAD; no source snapshots, secrets or URLs changed.
+
+README/contact provenance/Rich Menu/content-review docs updated. Existing
+manual OA Manager F may still open Premium Clinic: owner must change it to
+text ติดต่อผู้เกี่ยวข้อง after deployment. No live menu install or OA change,
+commit, push or deploy was performed. Phone validity and real-mobile acceptance
+remain owner verification steps.
+
+2026-10-20 tone follow-up: Owner requested a female bot voice. Changed only
+outgoing UI copy from ครับ to ค่ะ for statements/instructions, คะ for questions,
+and ผม to ฉัน in the same two-line welcome. Topic confirmation now ends
+ใช่ไหมคะ?. Humanizer used only for the non-clinical wording pass. User-input
+aliases/polite normalization still accept masculine and feminine forms; clinical
+corpus, sources, contact names/numbers, action destinations and artwork unchanged.
+No avatar/mascot replacement was requested or performed.
+
+Evidence: updated conversation expectations and a real-renderer UI voice test
+failed 38 assertions before the copy change, then 100 scoped tests passed.
+Fresh full suite: 373/373 across 18 files; typecheck, content:check and whitespace
+checks pass. Existing native workerd test asserts feminine suggestion copy.
+Independent read-only reviewer passed 187 render/conversation/coverage/snapshot
+tests and found no issues. Response-style docs reflect the new voice. Contact
+work remains intact; no commit, push, deploy or live LINE mutation was performed.

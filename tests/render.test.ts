@@ -2,10 +2,21 @@ import { expect, it } from 'vitest';
 import routes from '../content/routes.json';
 import ui from '../content/ui.json';
 import metadata from '../content/metadata.json';
-import { renderRoute, renderChoices, renderUi, renderResolution } from '../src/line/render';
+import { renderRoute, renderChoices, renderUi, renderResolution, renderTopicSuggestion } from '../src/line/render';
 import { clinicalText, componentText } from './support/rendered-content';
 
 const find = (id:string) => routes.find(r => r.routeId === id)!;
+
+it('uses the requested feminine voice in outgoing UI without changing accepted user phrasing',() => {
+  const messages = [
+    ...(['home','reset','report','contact','unsupported','greeting','thanks'] as const).flatMap(renderUi),
+    ...(['not_found','missing_context','unavailable'] as const).flatMap(reason => renderResolution({kind:'fallback',reason})),
+    ...renderChoices([find('opep.office'),find('opep.after_hours')]),
+    ...renderTopicSuggestion(ui.topicSuggestions[1]!),
+  ];
+  expect(/ครับ|ผม/u.test(JSON.stringify(messages))).toBe(false);
+  expect(renderResolution({kind:'fallback',reason:'not_found'})[0]).toMatchObject({type:'text',text:'ต้องการดูเรื่องไหนคะ เลือกจากเมนูด้านล่างได้เลย'});
+});
 
 it('keeps short answers as text from the approved corpus', () => {
   expect(renderRoute(find('opep.definition'))[0]).toMatchObject({type:'text',text:'oPEP = Occupational post exposure Prophylaxis'});
@@ -49,8 +60,24 @@ it('reports with the approved warning before a URI button and a copyable URL', (
   }
   expect(messages[1]).toEqual({type:'text',text:ui.reportUrl});
 });
-it('keeps contact pending, without inventing a phone or person', () => {
-  expect(renderUi('contact')[0]).toMatchObject({type:'text',text:ui.contactPending});
+it('shows every owner-supplied contact in a readable card without inferring dialing instructions', () => {
+  const messages = renderUi('contact');
+  expect(messages).toHaveLength(1);
+  const message = messages[0];
+  expect(message?.type).toBe('flex');
+  if(message?.type!=='flex')throw new Error('Expected contact card');
+  const block = message.contents.body.contents[1];
+  if(block?.type!=='box')throw new Error('Expected contact details');
+  expect(block.contents.map(componentText)).toEqual([
+    'งานป้องกันและควบคุมการติดเชื้อในโรงพยาบาล','1178 / 9270',
+    'ห้องตรวจอาชีวเวชกรรม','9274',
+    'ห้องฉุกเฉิน','1105 / 1106 / 9269',
+  ]);
+  expect(message.contents.footer?.contents).toEqual([expect.objectContaining({
+    action:{type:'postback',label:'กลับเมนูหลัก',data:'ui.home'},
+  })]);
+  const payload = JSON.stringify(messages);
+  for(const unknown of ['tel:','เบอร์ภายใน','053','พรีเมียม','อยู่ระหว่างจัดเตรียม']) expect(payload).not.toContain(unknown);
 });
 it('offers all six topics even before Rich Menu is installed', () => {
   const messages = renderUi('home');

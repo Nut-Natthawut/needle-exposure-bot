@@ -86,8 +86,9 @@ it('native Worker delivers every enabled answer and UI command as complete LINE 
       const route=routes.find(r=>r.routeId===value);
       if(route) expect(clinicalText(payloads.at(-1)!.messages[0]!),value).toBe(route.text);
       else expect(JSON.stringify(payloads.at(-1))).not.toContain(ui.fallback);
-      if(value==='เจาะเลืด'||value==='เจาะเลืดครับ?') expect(payloads.at(-1)!.messages[0]).toMatchObject({type:'text',text:'หมายถึงการเจาะเลือดใช่ไหมครับ?',quickReply:{items:[{type:'action',action:{type:'postback',label:'ใช่ ดูหัวข้อนี้',data:'lab.source.ic04'}},{type:'action',action:{type:'postback',label:'เลือกหัวข้ออื่น',data:'ui.home'}}]}});
+      if(value==='เจาะเลืด'||value==='เจาะเลืดครับ?') expect(payloads.at(-1)!.messages[0]).toMatchObject({type:'text',text:'หมายถึงการเจาะเลือดใช่ไหมคะ?',quickReply:{items:[{type:'action',action:{type:'postback',label:'ใช่ ดูหัวข้อนี้',data:'lab.source.ic04'}},{type:'action',action:{type:'postback',label:'เลือกหัวข้ออื่น',data:'ui.home'}}]}});
       if(value==='เจาะเลือดครับ!') expect(clinicalText(payloads.at(-1)!.messages[0]!)).toBe(routes.find(route=>route.routeId==='lab.source.ic04')!.text);
+      if(value==='ui.contact') expect(clinicalText(payloads.at(-1)!.messages[0]!)).toBe('งานป้องกันและควบคุมการติดเชื้อในโรงพยาบาล\n1178 / 9270\nห้องตรวจอาชีวเวชกรรม\n9274\nห้องฉุกเฉิน\n1105 / 1106 / 9269');
     }
     expect(payloads).toHaveLength(39);
   } finally {await runtime.dispose();}

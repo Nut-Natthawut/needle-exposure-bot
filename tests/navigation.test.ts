@@ -33,6 +33,19 @@ it.each(['ติดต่อผู้เกี่ยวข้อง','ราย�
   const messages=await setup().send(value,'text');
   expect(JSON.stringify(messages)).not.toContain(ui.fallback);
 });
+it.each([
+  ['ui.contact','postback'],
+  ['ติดต่อผู้เกี่ยวข้อง','text'],
+  ['ช่องทางติดต่อครับ','text'],
+  ['ติดต่อเจ้าหน้าที่ค่ะ','text'],
+] as const)('returns the supplied contact numbers through the signed webhook for %s',async(value,kind)=>{
+  const messages=await setup().send(value,kind);
+  expect(messages).toHaveLength(1);
+  expect(messages[0]?.type).toBe('flex');
+  if(messages[0]?.type!=='flex')throw new Error('Expected contact card');
+  expect(componentText(messages[0].contents.body)).toBe(
+    'ติดต่อผู้เกี่ยวข้องงานป้องกันและควบคุมการติดเชื้อในโรงพยาบาล1178 / 9270ห้องตรวจอาชีวเวชกรรม9274ห้องฉุกเฉิน1105 / 1106 / 9269');
+});
 it('signed oPEP menu asks for office/after-hours instead of assuming a treatment branch',async()=>{
   const messages=await setup().send('ui.opep');
   expect(messages[0]?.type).toBe('flex');

@@ -21,7 +21,7 @@ function contrast(a:string,b:string):number {
 }
 function allCards():FlexMessage[] {
   return [...routes.filter(r=>r.enabled).flatMap(renderRoute),...renderUi('home'),
-    ...renderUi('report'),...renderChoices(routes.filter(r=>['opep.office','opep.after_hours'].includes(r.routeId)))]
+    ...renderUi('report'),...renderUi('contact'),...renderChoices(routes.filter(r=>['opep.office','opep.after_hours'].includes(r.routeId)))]
     .filter((message):message is FlexMessage=>message.type==='flex');
 }
 

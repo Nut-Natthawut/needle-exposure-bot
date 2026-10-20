@@ -68,11 +68,12 @@ export function resolveUiCommand(input:ActionInput): UiCommand|null {
 }
 export function renderUi(command:Exclude<UiCommand,'opep'>): ReplyMessage[] {
   if (command === 'report') return [card(ui.reportTitle,ui.reportWarning,[actionButton({type:'uri',label:ui.reportLabel,uri:ui.reportUrl},'primary'),homeButton()],{bodyTone:'warning'}),{type:'text',text:ui.reportUrl}];
-  const value = command === 'home' || command === 'greeting' ? ui.welcome : command === 'thanks' ? ui.thanks : command === 'reset' ? ui.reset : command === 'unsupported' ? ui.unsupported : ui.contactPending;
+  if (command === 'contact') return [card(ui.contactTitle,ui.contactDetails,[homeButton()])];
+  const value = command === 'home' || command === 'greeting' ? ui.welcome : command === 'thanks' ? ui.thanks : command === 'reset' ? ui.reset : ui.unsupported;
   return [{type:'text',text:value},homeCard()];
 }
 export function renderTopicSuggestion(topic:TopicSuggestion):ReplyMessage[] {
-  return [{type:'text',text:`หมายถึง${topic.label}ใช่ไหมครับ?`,quickReply:quickReply([
+  return [{type:'text',text:`หมายถึง${topic.label}ใช่ไหมคะ?`,quickReply:quickReply([
     {routeId:topic.postbackId,label:ui.confirmTopicLabel},
     {routeId:'ui.home',label:ui.otherTopicLabel},
   ])}];
